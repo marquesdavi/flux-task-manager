@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl
 
     @Value("${jwt.token.expires-in:3600}")
     private long expiresIn;
-    private static final String ISSUER = "kontakt-api";
+    private static final String ISSUER = "flux-api";
 
     @Override
     public TokenResponse authenticate(LoginRequest request) {
