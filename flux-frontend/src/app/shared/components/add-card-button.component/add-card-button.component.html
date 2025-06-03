@@ -1,0 +1,13 @@
+<button
+  (click)="clickAdd.emit()"
+  class="flex items-center justify-center rounded-lg h-10 px-2 text-sm font-bold tracking-[0.015em] transition-colors duration-150"
+  [ngStyle]="{
+    'background-color': isHovered ? hoverBgColor : bgColor,
+    color: color
+  }"
+  (mouseenter)="isHovered = true"
+  (mouseleave)="isHovered = false"
+>
+  <app-material-symbol size="18px" [color]="color">add</app-material-symbol>
+  <span class="hidden sm:inline ml-2">{{ label }}</span>
+</button>
