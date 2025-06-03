@@ -9,12 +9,19 @@ public interface CrudService<
         ResponseDto,
         ID
         > {
-    default ResponseDto create(String userId, CreateDto dto) {
+    default ResponseDto create(CreateDto dto) {
         return null;
     }
 
-    List<ResponseDto> listAllForUser(String userId);
-    ResponseDto getById(String userId, ID id);
-    ResponseDto update(String userId, ID id, UpdateDto dto);
-    void delete(String userId, ID id);
+    default List<ResponseDto> listAllForUser() {
+        return null;
+    }
+
+    ResponseDto getById(ID id);
+
+    ResponseDto update(ID id, UpdateDto dto);
+
+    void delete(ID id);
+
+    Entity findById(ID id);
 }

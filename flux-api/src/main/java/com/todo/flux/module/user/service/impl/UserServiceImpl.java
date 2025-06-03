@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
         log.info("User with email {} successfully created.", dto.email());
     }
 
-    private void existsByEmail(String email) {
+    public void existsByEmail(String email) {
         if (userRepository.existsByEmail(email)) {
             log.warn("User with email {} already exists!", email);
             throw new AlreadyExistsException("User already exists");

@@ -32,7 +32,7 @@ public class SwaggerConfig {
                 .servers(
                         List.of(
                                 new Server().url(defaultOrigin)))
-                .info(new Info().title("Kontakt API").version("0.1"))
+                .info(new Info().title("Flux API").version("0.1"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(
                         new Components()

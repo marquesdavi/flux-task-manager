@@ -1,5 +1,6 @@
 package com.todo.flux.module.board.entity;
 
+import com.todo.flux.module.board.dto.BoardResponse;
 import com.todo.flux.module.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,4 +36,14 @@ public class Board {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    public BoardResponse toResponse() {
+        return new BoardResponse(
+                this.getId(),
+                this.getTitle(),
+                this.getOwner().getId(),
+                this.getCreatedAt(),
+                this.getUpdatedAt()
+        );
+    }
 }

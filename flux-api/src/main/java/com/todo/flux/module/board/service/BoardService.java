@@ -16,9 +16,9 @@ public interface BoardService extends CrudService<
         BoardResponse,
         UUID
         > {
-    BoardResponse create(String userId, BoardCreateRequest dto);
-    List<BoardResponse> listAllForUser(String userId);
-    BoardResponse getById(String userId, UUID boardId);
-    BoardResponse update(String userId, UUID boardId, BoardUpdateRequest dto);
-    void delete(String userId, UUID boardId);
+    BoardResponse create(BoardCreateRequest dto);
+    List<BoardResponse> listAllForUser();
+    BoardResponse getById(UUID boardId);
+    BoardResponse update(UUID boardId, BoardUpdateRequest dto);
+    void delete(UUID boardId);
 }

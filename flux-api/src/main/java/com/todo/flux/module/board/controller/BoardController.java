@@ -31,8 +31,8 @@ public class BoardController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
-    public ResponseEntity<List<BoardResponse>> getAllForUser(Principal principal) {
-        List<BoardResponse> boards = boardService.listAllForUser(principal.getName());
+    public ResponseEntity<List<BoardResponse>> getAllForUser() {
+        List<BoardResponse> boards = boardService.listAllForUser();
         return ResponseEntity.ok(boards);
     }
 
@@ -44,9 +44,8 @@ public class BoardController {
     })
     @PostMapping
     public ResponseEntity<BoardResponse> create(
-            Principal principal,
             @Valid @RequestBody BoardCreateRequest dto) {
-        BoardResponse response = boardService.create(principal.getName(), dto);
+        BoardResponse response = boardService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -58,9 +57,8 @@ public class BoardController {
     })
     @GetMapping("/{boardId}")
     public ResponseEntity<BoardResponse> getById(
-            Principal principal,
             @PathVariable UUID boardId) {
-        BoardResponse response = boardService.getById(principal.getName(), boardId);
+        BoardResponse response = boardService.getById(boardId);
         return ResponseEntity.ok(response);
     }
 
@@ -73,10 +71,9 @@ public class BoardController {
     })
     @PatchMapping("/{boardId}")
     public ResponseEntity<BoardResponse> update(
-            Principal principal,
             @PathVariable UUID boardId,
             @Valid @RequestBody BoardUpdateRequest dto) {
-        BoardResponse response = boardService.update(principal.getName(), boardId, dto);
+        BoardResponse response = boardService.update(boardId, dto);
         return ResponseEntity.ok(response);
     }
 
@@ -88,9 +85,8 @@ public class BoardController {
     })
     @DeleteMapping("/{boardId}")
     public ResponseEntity<Void> delete(
-            Principal principal,
             @PathVariable UUID boardId) {
-        boardService.delete(principal.getName(), boardId);
+        boardService.delete(boardId);
         return ResponseEntity.ok().build();
     }
 }

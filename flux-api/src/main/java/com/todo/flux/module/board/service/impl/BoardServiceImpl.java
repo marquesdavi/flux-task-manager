@@ -1,5 +1,7 @@
 package com.todo.flux.module.board.service.impl;
 
+import com.todo.flux.module.auth.dto.LoginRequest;
+import com.todo.flux.module.auth.dto.TokenResponse;
 import com.todo.flux.module.board.dto.BoardCreateRequest;
 import com.todo.flux.module.board.dto.BoardResponse;
 import com.todo.flux.module.board.dto.BoardUpdateRequest;
@@ -14,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,11 +25,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
     private final BoardRepository boardRepository;
-    private final AuthenticationService<User, ?, ?> authService;
+    private final AuthenticationService<User, LoginRequest, TokenResponse> authService;
 
     @Override
     @Transactional
-    public BoardResponse create(String userId, BoardCreateRequest dto) {
+    public BoardResponse create(BoardCreateRequest dto) {
         User currentUser = authService.getAuthenticated();
         log.info("Creating board '{}' for user id={}", dto.title(), currentUser.getId());
 
@@ -38,38 +39,36 @@ public class BoardServiceImpl implements BoardService {
                 .build();
 
         Board saved = boardRepository.save(board);
-        return mapToResponse(saved);
+        return saved.toResponse();
     }
 
     @Override
-    public List<BoardResponse> listAllForUser(String userId) {
+    public List<BoardResponse> listAllForUser() {
         User currentUser = authService.getAuthenticated();
         log.info("Listing boards for user id={}", currentUser.getId());
 
         return boardRepository.findByOwnerId(currentUser.getId()).stream()
-                .map(this::mapToResponse)
+                .map(Board::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public BoardResponse getById(String userId, UUID boardId) {
+    public BoardResponse getById(UUID boardId) {
         User currentUser = authService.getAuthenticated();
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new NotFoundException("Board not found"));
+        Board board = findById(boardId);
 
         if (!board.getOwner().getId().equals(currentUser.getId())) {
             throw new NotFoundException("Board not found for this user");
         }
 
-        return mapToResponse(board);
+        return board.toResponse();
     }
 
     @Override
     @Transactional
-    public BoardResponse update(String userId, UUID boardId, BoardUpdateRequest dto) {
+    public BoardResponse update(UUID boardId, BoardUpdateRequest dto) {
         User currentUser = authService.getAuthenticated();
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new NotFoundException("Board not found"));
+        Board board = findById(boardId);
 
         if (!board.getOwner().getId().equals(currentUser.getId())) {
             throw new NotFoundException("Board not found for this user");
@@ -78,15 +77,14 @@ public class BoardServiceImpl implements BoardService {
         log.info("Updating board id={} title to '{}' for user id={}", boardId, dto.title(), currentUser.getId());
         board.setTitle(dto.title());
         Board updated = boardRepository.save(board);
-        return mapToResponse(updated);
+        return updated.toResponse();
     }
 
     @Override
     @Transactional
-    public void delete(String userId, UUID boardId) {
+    public void delete(UUID boardId) {
         User currentUser = authService.getAuthenticated();
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new NotFoundException("Board not found"));
+        Board board = findById(boardId);
 
         if (!board.getOwner().getId().equals(currentUser.getId())) {
             throw new NotFoundException("Board not found for this user");
@@ -96,13 +94,9 @@ public class BoardServiceImpl implements BoardService {
         boardRepository.delete(board);
     }
 
-    private BoardResponse mapToResponse(Board board) {
-        return new BoardResponse(
-                board.getId(),
-                board.getTitle(),
-                board.getOwner().getId(),
-                board.getCreatedAt(),
-                board.getUpdatedAt()
-        );
+    @Override
+    public Board findById(UUID uuid) {
+        return boardRepository.findById(uuid)
+                .orElseThrow(() -> new NotFoundException("Board not found"));
     }
 }
