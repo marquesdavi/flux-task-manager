@@ -41,7 +41,7 @@ public class CardServiceImpl implements CardService {
             throw new NotFoundException("Board not found for this user");
         }
 
-        log.info("Creating card '{}' on board id={} for user id={}", dto.title(), boardId, currentUser.getId());
+        log.info("Creating card '{}' on board id={}", dto.title(), boardId);
         Card card = Card.fromRequest(dto, board);
         Card saved = cardRepository.save(card);
         return saved.toResponse();
