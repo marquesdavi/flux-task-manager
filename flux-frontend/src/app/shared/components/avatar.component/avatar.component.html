@@ -1,0 +1,15 @@
+<div
+  class="relative"
+  [ngClass]="'w-' + size + ' h-' + size"
+>
+  <!-- imagem de fundo -->
+  <div
+    class="bg-center bg-no-repeat bg-cover rounded-full w-full h-full"
+    [style.backgroundImage]="'url(' + imageUrl + ')'"
+  ></div>
+
+  <!-- slot para o ícone, centralizado -->
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <ng-content></ng-content>
+  </div>
+</div>
