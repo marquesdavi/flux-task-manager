@@ -1,0 +1,14 @@
+/* Garante que o modal não ultrapasse a viewport e tenha scroll interno */
+:host ::ng-deep .modal-container {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Ajuste geral para ocupar 100% da altura disponível */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Inputs, selects e textareas já estão configurados via classes inline */
