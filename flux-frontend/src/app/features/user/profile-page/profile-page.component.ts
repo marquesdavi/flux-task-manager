@@ -1,9 +1,10 @@
-import { Component, OnDestroy, signal, computed, inject } from '@angular/core';
-import { CommonModule }     from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { UserService, RegisterRequest, User } from '../../../core/service/user.service';
-import { AuthenticationService }            from '../../../core/service/auth.service';
-import { Subscription }                    from 'rxjs';
+import {Component, OnDestroy, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router, RouterModule} from '@angular/router';
+import {UserService} from '../../../core/service/user.service';
+import {AuthenticationService} from '../../../core/service/auth.service';
+import {Subscription} from 'rxjs';
+import {RegisterRequest, User} from '../../../core/models/user';
 
 @Component({
   selector: 'app-profile-page',
@@ -13,18 +14,17 @@ import { Subscription }                    from 'rxjs';
   styleUrls: ['./profile-page.component.css'],
 })
 export class ProfilePageComponent implements OnDestroy {
-  usernameSignal       = signal('');
-  emailSignal          = signal('');
-  passwordSignal       = signal('');
+  firstNameSignal = signal('');
+  lastNameSignal = signal('');
+  emailSignal = signal('');
+  passwordSignal = signal('');
 
-  loadingSignal        = signal(false);
-  errorSignal          = signal<string | null>(null);
-
-  private userId      = 1;
+  loadingSignal = signal(false);
+  errorSignal = signal<string | null>(null);
 
   private userService = inject(UserService);
   private authService = inject(AuthenticationService);
-  private router      = inject(Router);
+  private router = inject(Router);
 
   private fetchSub?: Subscription;
   private saveSub?: Subscription;
@@ -40,9 +40,11 @@ export class ProfilePageComponent implements OnDestroy {
 
   private loadUserData(): void {
     this.loadingSignal.set(true);
-    this.fetchSub = this.userService.getById(this.userId).subscribe({
+    this.fetchSub = this.userService.getCurrent().subscribe({
       next: (user: User) => {
-        this.usernameSignal.set(user.username);
+
+        this.firstNameSignal.set(user.firstName);
+        this.lastNameSignal.set(user.lastName);
         this.emailSignal.set(user.email);
         this.loadingSignal.set(false);
       },
@@ -54,10 +56,16 @@ export class ProfilePageComponent implements OnDestroy {
   }
 
   private isFormValid(): boolean {
-    const username = this.usernameSignal().trim();
-    const email    = this.emailSignal().trim();
-    if (!username) {
-      this.errorSignal.set('Usuário é obrigatório.');
+    const firstName = this.firstNameSignal().trim();
+    const lastName = this.lastNameSignal().trim();
+    const email = this.emailSignal().trim();
+
+    if (!firstName) {
+      this.errorSignal.set('Nome é obrigatório.');
+      return false;
+    }
+    if (!lastName) {
+      this.errorSignal.set('Sobrenome é obrigatório.');
       return false;
     }
     if (!email) {
@@ -82,12 +90,13 @@ export class ProfilePageComponent implements OnDestroy {
     this.loadingSignal.set(true);
 
     const payload: RegisterRequest = {
-      username: this.usernameSignal().trim(),
-      email:    this.emailSignal().trim(),
+      firstName: this.firstNameSignal().trim(),
+      lastName: this.lastNameSignal().trim(),
+      email: this.emailSignal().trim(),
       password: this.passwordSignal().trim() || ''
     };
 
-    this.saveSub = this.userService.update(this.userId, payload).subscribe({
+    this.saveSub = this.userService.updateCurrent(payload).subscribe({
       next: () => {
         this.loadingSignal.set(false);
         alert('Dados atualizados com sucesso.');
@@ -105,7 +114,7 @@ export class ProfilePageComponent implements OnDestroy {
     }
 
     this.loadingSignal.set(true);
-    this.deleteSub = this.userService.delete(this.userId).subscribe({
+    this.deleteSub = this.userService.deleteCurrent().subscribe({
       next: () => {
         this.loadingSignal.set(false);
         this.authService.logout();

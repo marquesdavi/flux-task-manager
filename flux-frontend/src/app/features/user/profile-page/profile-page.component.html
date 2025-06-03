@@ -1,69 +1,86 @@
+<!-- src/app/features/profile-page/profile-page.component.html -->
 <div class="max-w-md mx-auto mt-8 p-6 bg-[#1f2933] rounded-lg shadow-md text-white">
-  <h1 class="text-2xl font-bold mb-6">Configurações da Conta</h1>
+    <h1 class="text-2xl font-bold mb-6">Configurações da Conta</h1>
 
-  @if (errorSignal()) {
-    <div class="mb-4 text-red-400">
-      {{ errorSignal() }}
-    </div>
-  }
+    @if (errorSignal()) {
+        <div class="mb-4 text-red-400">
+            {{ errorSignal() }}
+        </div>
+    }
 
-  @if (loadingSignal()) {
-    <div class="mb-4 text-center text-gray-300">
-      Carregando...
-    </div>
-  } @else {
-    <div class="space-y-6">
-      <div>
-        <label class="block text-gray-300 mb-1">Usuário</label>
-        <input
-          type="text"
-          [value]="usernameSignal()"
-          (input)="usernameSignal.set($any($event.target).value)"
-          class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+    @if (loadingSignal()) {
+        <div class="mb-4 text-center text-gray-300">
+            Carregando...
+        </div>
+    } @else {
+        <div class="space-y-6">
+            <!-- Primeiro nome -->
+            <div>
+                <label class="block text-gray-300 mb-1">Primeiro Nome</label>
+                <input
+                    type="text"
+                    [value]="firstNameSignal()"
+                    (input)="firstNameSignal.set($any($event.target).value)"
+                    class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                  text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-        />
-      </div>
+                />
+            </div>
 
-      <div>
-        <label class="block text-gray-300 mb-1">Email</label>
-        <input
-          type="email"
-          [value]="emailSignal()"
-          (input)="emailSignal.set($any($event.target).value)"
-          class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+            <!-- Sobrenome -->
+            <div>
+                <label class="block text-gray-300 mb-1">Sobrenome</label>
+                <input
+                    type="text"
+                    [value]="lastNameSignal()"
+                    (input)="lastNameSignal.set($any($event.target).value)"
+                    class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                  text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-        />
-      </div>
+                />
+            </div>
 
-      <div>
-        <label class="block text-gray-300 mb-1">
-          Senha (deixe em branco para não alterar)
-        </label>
-        <input
-          type="password"
-          [value]="passwordSignal()"
-          (input)="passwordSignal.set($any($event.target).value)"
-          class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+            <!-- Email -->
+            <div>
+                <label class="block text-gray-300 mb-1">Email</label>
+                <input
+                    type="email"
+                    [value]="emailSignal()"
+                    (input)="emailSignal.set($any($event.target).value)"
+                    class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                  text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-        />
-      </div>
+                />
+            </div>
 
-      <div class="flex justify-between items-center">
-        <button
-          (click)="save()"
-          class="bg-[#007bff] hover:bg-[#005bb5] text-white font-semibold
+            <!-- Senha -->
+            <div>
+                <label class="block text-gray-300 mb-1">
+                    Senha (deixe em branco para não alterar)
+                </label>
+                <input
+                    type="password"
+                    [value]="passwordSignal()"
+                    (input)="passwordSignal.set($any($event.target).value)"
+                    class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                />
+            </div>
+
+            <!-- Botões Salvar / Excluir -->
+            <div class="flex justify-between items-center">
+                <button
+                    (click)="save()"
+                    class="bg-[#007bff] hover:bg-[#005bb5] text-white font-semibold
                  px-4 py-2 rounded transition-colors"
-        >
-          Salvar Alterações
-        </button>
-        <button
-          (click)="deleteAccount()"
-          class="bg-red-600 hover:bg-red-700 text-white font-semibold
+                >
+                    Salvar Alterações
+                </button>
+                <button
+                    (click)="deleteAccount()"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold
                  px-4 py-2 rounded transition-colors"
-        >
-          Excluir Conta
-        </button>
-      </div>
-    </div>
-  }
+                >
+                    Excluir Conta
+                </button>
+            </div>
+        </div>
+    }
 </div>
