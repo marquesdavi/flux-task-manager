@@ -1,232 +1,375 @@
 <!-- src/app/features/board-page/board-page.component.html -->
 <div
-  class="px-6 py-5 bg-[#111a22] flex-1 w-full h-full"
-  style="font-family: Inter, 'Noto Sans', sans-serif;"
+    class="px-6 py-5 bg-[#111a22] flex-1 w-full h-full"
+    style="font-family: Inter, 'Noto Sans', sans-serif;"
 >
-  <!-- Agrupa listas para DragDrop -->
-  <div class="flex flex-row gap-6 overflow-x-auto" cdkDropListGroup>
-    <!-- Itera sobre cada coluna definida em `columns` -->
-    @for (col of columns; track col.title) {
-      <div
-        cdkDropList
-        [cdkDropListData]="col.tasks"
-        class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
-        (cdkDropListDropped)="drop($event)"
-      >
-        <!-- Cabeçalho da coluna com botão “Add” -->
-        <app-column-header [title]="col.title">
-          <app-add-card-button
-            add-button
-            [label]="'Add'"
-            (clickAdd)="onAddCardClick(columns.indexOf(col))"
-          ></app-add-card-button>
-        </app-column-header>
+    <!-- Agrupa as listas para DragDrop -->
+    <div class="flex flex-row gap-6 overflow-x-auto" cdkDropListGroup>
+        <!-- TO DO -->
+        <div
+            cdkDropList
+            #dropListToDo="cdkDropList"
+            [cdkDropListData]="columns[0].tasks"
+            [cdkDropListConnectedTo]="[dropListDoing, dropListDone]"
+            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+            (cdkDropListDropped)="drop($event)"
+        >
+            <app-column-header [title]="columns[0].title">
+                <app-add-card-button
+                    add-button
+                    [label]="'Add'"
+                    (clickAdd)="onAddCardClick(0)"
+                ></app-add-card-button>
+            </app-column-header>
 
-        <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
-          <!-- (1) Input de novo card, exibido se showNewCardInput[índice] for true -->
-          @if (showNewCardInput[columns.indexOf(col)]) {
-            <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
-              <input
-                #newCardInput
-                type="text"
-                class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
-                       focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
-                       placeholder:text-[#93b0c8]"
-                placeholder="Digite o título do card…"
-                [(ngModel)]="newCardTitle[columns.indexOf(col)]"
-                (keydown)="onCardInputKeyDown($event, columns.indexOf(col))"
-              />
+            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                <!-- Input de novo card -->
+                @if(showNewCardInput[0]) {
+                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                        <input
+                            #newCardInput
+                            type="text"
+                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                     focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                     placeholder:text-[#93b0c8]"
+                            placeholder="Digite o título do card…"
+                            [(ngModel)]="newCardTitle[0]"
+                            (keydown)="onCardInputKeyDown($event, 0)"
+                        />
+                        <div class="mt-2 flex items-center gap-2">
+                            <button
+                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                       hover:bg-[#005bb5] transition-colors"
+                                (click)="onCreateCard(0)"
+                            >
+                                Create card
+                            </button>
+                            <button
+                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                       transition-colors"
+                                (click)="onCancelCard(0)"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        @if(newCardError[0]) {
+                            <p class="mt-1 text-sm text-red-500">
+                                {{ newCardError[0] }}
+                            </p>
+                        }
+                    </div>
+                }
 
-              <div class="mt-2 flex items-center gap-2">
-                <button
-                  class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
-                         hover:bg-[#005bb5] transition-colors"
-                  (click)="onCreateCard(columns.indexOf(col))"
-                >
-                  Create card
-                </button>
-                <button
-                  class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
-                         transition-colors"
-                  (click)="onCancelCard(columns.indexOf(col))"
-                >
-                  Cancel
-                </button>
-              </div>
+                <!-- Lista de cards existentes -->
+                @for(task of columns[0].tasks; track task.id) {
+                    <div
+                        cdkDrag
+                        [cdkDragData]="task"
+                        (click)="openModal(task.id); $event.stopPropagation()"
+                        class="cursor-pointer"
+                    >
+                        <app-card
+                            [title]="task.title"
+                            [description]="task.descriptionBrief"
+                            [imageUrl]="task.imageUrl"
+                            (edit)="onAction('edit ' + task.id)"
+                            (delete)="onAction('delete ' + task.id)"
+                        ></app-card>
+                    </div>
+                }
 
-              @if (newCardError[columns.indexOf(col)]) {
-                <p class="mt-1 text-sm text-red-500">
-                  {{ newCardError[columns.indexOf(col)] }}
-                </p>
-              }
+                <!-- Mensagem quando não há cards nem input aberto -->
+                @if(!columns[0].tasks.length && !showNewCardInput[0]) {
+                    <p class="text-[#93b0c8]">
+                        Nenhum card em {{ columns[0].title }}
+                    </p>
+                }
             </div>
-          }
-
-          <!-- (2) Lista de cards existentes -->
-          @for (task of col.tasks; track task.id) {
-            <div
-              cdkDrag
-              [cdkDragData]="task"
-              (click)="openModal(task.id); $event.stopPropagation()"
-              class="cursor-pointer"
-            >
-              <app-card
-                [title]="task.title"
-                [description]="task.description"
-                [imageUrl]="task.imageUrl"
-                (edit)="onAction('edit ' + task.id)"
-                (delete)="onAction('delete ' + task.id)"
-              ></app-card>
-            </div>
-          } @empty {
-            <!-- Mostra coluna vazia com a mensagem personalizada -->
-            <p class="text-[#93b0c8]">Nenhum card em {{ col.title }}</p>
-          }
-
-          <!-- (3) Placeholder de arrasto, se necessário -->
-          @if (dragging) {
-            <app-drag-drop-placeholder></app-drag-drop-placeholder>
-          }
         </div>
-      </div>
-    } @empty {
-      <p class="text-[#93b0c8]">Sem colunas para exibir</p>
-    }
-  </div>
+
+        <!-- DOING -->
+        <div
+            cdkDropList
+            #dropListDoing="cdkDropList"
+            [cdkDropListData]="columns[1].tasks"
+            [cdkDropListConnectedTo]="[dropListToDo, dropListDone]"
+            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+            (cdkDropListDropped)="drop($event)"
+        >
+            <app-column-header [title]="columns[1].title">
+                <app-add-card-button
+                    add-button
+                    [label]="'Add'"
+                    (clickAdd)="onAddCardClick(1)"
+                ></app-add-card-button>
+            </app-column-header>
+
+            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                <!-- Input de novo card -->
+                @if(showNewCardInput[1]) {
+                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                        <input
+                            #newCardInput
+                            type="text"
+                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                     focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                     placeholder:text-[#93b0c8]"
+                            placeholder="Digite o título do card…"
+                            [(ngModel)]="newCardTitle[1]"
+                            (keydown)="onCardInputKeyDown($event, 1)"
+                        />
+                        <div class="mt-2 flex items-center gap-2">
+                            <button
+                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                       hover:bg-[#005bb5] transition-colors"
+                                (click)="onCreateCard(1)"
+                            >
+                                Create card
+                            </button>
+                            <button
+                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                       transition-colors"
+                                (click)="onCancelCard(1)"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        @if(newCardError[1]) {
+                            <p class="mt-1 text-sm text-red-500">
+                                {{ newCardError[1] }}
+                            </p>
+                        }
+                    </div>
+                }
+
+                <!-- Lista de cards existentes -->
+                @for(task of columns[1].tasks; track task.id) {
+                    <div
+                        cdkDrag
+                        [cdkDragData]="task"
+                        (click)="openModal(task.id); $event.stopPropagation()"
+                        class="cursor-pointer"
+                    >
+                        <app-card
+                            [title]="task.title"
+                            [description]="task.descriptionBrief"
+                            [imageUrl]="task.imageUrl"
+                            (edit)="onAction('edit ' + task.id)"
+                            (delete)="onAction('delete ' + task.id)"
+                        ></app-card>
+                    </div>
+                }
+
+                <!-- Mensagem quando não há cards nem input aberto -->
+                @if(!columns[1].tasks.length && !showNewCardInput[1]) {
+                    <p class="text-[#93b0c8]">
+                        Nenhum card em {{ columns[1].title }}
+                    </p>
+                }
+            </div>
+        </div>
+
+        <!-- DONE -->
+        <div
+            cdkDropList
+            #dropListDone="cdkDropList"
+            [cdkDropListData]="columns[2].tasks"
+            [cdkDropListConnectedTo]="[dropListToDo, dropListDoing]"
+            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+            (cdkDropListDropped)="drop($event)"
+        >
+            <app-column-header [title]="columns[2].title">
+                <app-add-card-button
+                    add-button
+                    [label]="'Add'"
+                    (clickAdd)="onAddCardClick(2)"
+                ></app-add-card-button>
+            </app-column-header>
+
+            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                <!-- Input de novo card -->
+                @if(showNewCardInput[2]) {
+                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                        <input
+                            #newCardInput
+                            type="text"
+                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                     focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                     placeholder:text-[#93b0c8]"
+                            placeholder="Digite o título do card…"
+                            [(ngModel)]="newCardTitle[2]"
+                            (keydown)="onCardInputKeyDown($event, 2)"
+                        />
+                        <div class="mt-2 flex items-center gap-2">
+                            <button
+                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                       hover:bg-[#005bb5] transition-colors"
+                                (click)="onCreateCard(2)"
+                            >
+                                Create card
+                            </button>
+                            <button
+                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                       transition-colors"
+                                (click)="onCancelCard(2)"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                        @if(newCardError[2]) {
+                            <p class="mt-1 text-sm text-red-500">
+                                {{ newCardError[2] }}
+                            </p>
+                        }
+                    </div>
+                }
+
+                <!-- Lista de cards existentes -->
+                @for(task of columns[2].tasks; track task.id) {
+                    <div
+                        cdkDrag
+                        [cdkDragData]="task"
+                        (click)="openModal(task.id); $event.stopPropagation()"
+                        class="cursor-pointer"
+                    >
+                        <app-card
+                            [title]="task.title"
+                            [description]="task.descriptionBrief"
+                            [imageUrl]="task.imageUrl"
+                            (edit)="onAction('edit ' + task.id)"
+                            (delete)="onAction('delete ' + task.id)"
+                        ></app-card>
+                    </div>
+                }
+
+                <!-- Mensagem quando não há cards nem input aberto -->
+                @if(!columns[2].tasks.length && !showNewCardInput[2]) {
+                    <p class="text-[#93b0c8]">
+                        Nenhum card em {{ columns[2].title }}
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- ==============================================
-     MODAL (APARECE SE showModal for true)
-     ==============================================-->
-@if (showModal) {
-  <div
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
-    <div
-      class="bg-[#1f2933] rounded-lg shadow-xl w-[90%] md:w-[600px]
-             max-h-[90vh] overflow-y-auto p-6 modal-container"
-    >
-      <h2 class="text-white text-xl font-bold mb-4">Editar Card</h2>
+<!-- Modal de edição do card -->
+@if(showModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-[#1f2933] rounded-lg shadow-xl w-[90%] md:w-[600px] max-h-[90vh] overflow-y-auto p-6 modal-container">
+            <h2 class="text-white text-xl font-bold mb-4">Editar Card</h2>
 
-      @if (!modalData) {
-        <p class="text-[#93b0c8] mb-4">Carregando dados…</p>
-      } @else {
-        <div class="flex flex-col gap-4">
-          <!-- 1) Título -->
-          <div>
-            <label class="block text-gray-300 mb-1">Título</label>
-            <input
-              type="text"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+            @if(!modalData) {
+                <p class="text-[#93b0c8] mb-4">Carregando dados…</p>
+            }
+
+            @if(modalData) {
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block text-gray-300 mb-1">Título</label>
+                        <input
+                            type="text"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.title"
-            />
-          </div>
+                            [(ngModel)]="modalData.title"
+                        />
+                    </div>
 
-          <!-- 2) Descrição Breve -->
-          <div>
-            <label class="block text-gray-300 mb-1">Descrição Breve</label>
-            <textarea
-              rows="2"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Descrição Breve</label>
+                        <textarea
+                            rows="2"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.descriptionBrief"
-            ></textarea>
-          </div>
+                            [(ngModel)]="modalData.descriptionBrief"
+                        ></textarea>
+                    </div>
 
-          <!-- 3) Descrição Completa -->
-          <div>
-            <label class="block text-gray-300 mb-1">Descrição Completa</label>
-            <textarea
-              rows="4"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Descrição Completa</label>
+                        <textarea
+                            rows="4"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.descriptionFull"
-            ></textarea>
-          </div>
+                            [(ngModel)]="modalData.descriptionFull"
+                        ></textarea>
+                    </div>
 
-          <!-- 4) Status -->
-          <div>
-            <label class="block text-gray-300 mb-1">Status</label>
-            <select
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Status</label>
+                        <select
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.status"
-            >
-              <option class="text-black" value="To Do">To Do</option>
-              <option class="text-black" value="Doing">Doing</option>
-              <option class="text-black" value="Done">Done</option>
-            </select>
-          </div>
+                            [(ngModel)]="modalData.status"
+                        >
+                            <option class="text-black" value="To Do">To Do</option>
+                            <option class="text-black" value="Doing">Doing</option>
+                            <option class="text-black" value="Done">Done</option>
+                        </select>
+                    </div>
 
-          <!-- 5) Data de Início -->
-          <div>
-            <label class="block text-gray-300 mb-1">Data de Início</label>
-            <input
-              type="date"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Data de Início</label>
+                        <input
+                            type="date"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.startDate"
-            />
-          </div>
+                            [(ngModel)]="modalData.startDate"
+                        />
+                    </div>
 
-          <!-- 6) Data de Fim -->
-          <div>
-            <label class="block text-gray-300 mb-1">Data de Fim</label>
-            <input
-              type="date"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Data de Fim</label>
+                        <input
+                            type="date"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.endDate"
-            />
-          </div>
+                            [(ngModel)]="modalData.endDate"
+                        />
+                    </div>
 
-          <!-- 7) Due Date (Prazo Máximo) -->
-          <div>
-            <label class="block text-gray-300 mb-1">Prazo Máximo (Due Date)</label>
-            <input
-              type="date"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">Prazo Máximo (Due Date)</label>
+                        <input
+                            type="date"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.dueDate"
-            />
-          </div>
+                            [(ngModel)]="modalData.dueDate"
+                        />
+                    </div>
 
-          <!-- 8) URL da Imagem (Opcional) -->
-          <div>
-            <label class="block text-gray-300 mb-1">URL da Imagem</label>
-            <input
-              type="text"
-              class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                    <div>
+                        <label class="block text-gray-300 mb-1">URL da Imagem</label>
+                        <input
+                            type="text"
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
                      text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-              [(ngModel)]="modalData.imageUrl"
-            />
-          </div>
+                            [(ngModel)]="modalData.imageUrl"
+                        />
+                    </div>
 
-          <!-- Mensagem de erro, se houver -->
-          @if (modalError) {
-            <p class="text-red-500">{{ modalError }}</p>
-          }
+                    @if(modalError) {
+                        <p class="text-red-500">{{ modalError }}</p>
+                    }
 
-          <!-- Botões Cancel / Save -->
-          <div class="mt-4 flex justify-end gap-3">
-            <button
-              class="bg-[#374151] text-[#93b0c8] px-4 py-2 rounded hover:bg-[#4b5563]
+                    <div class="mt-4 flex justify-end gap-3">
+                        <button
+                            class="bg-[#374151] text-[#93b0c8] px-4 py-2 rounded hover:bg-[#4b5563]
                      transition-colors"
-              (click)="closeModal()"
-            >
-              Cancel
-            </button>
-            <button
-              class="bg-[#007bff] text-white px-4 py-2 rounded hover:bg-[#005bb5]
+                            (click)="closeModal()"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            class="bg-[#007bff] text-white px-4 py-2 rounded hover:bg-[#005bb5]
                      transition-colors"
-              (click)="saveModal()"
-            >
-              Save
-            </button>
-          </div>
+                            (click)="saveModal()"
+                        >
+                            Save
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
-      }
     </div>
-  </div>
 }

@@ -16,7 +16,7 @@ import {MaterialSymbolComponent} from '../../layout/material-symbol.component/ma
 export class CardComponent {
   @Input() title = '';
   @Input() description: string | undefined = '';
-  @Input() imageUrl?: string;
+  @Input({transform: (value: string | null): string | null => value}) imageUrl?: string;
   @Output() edit = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
 }
