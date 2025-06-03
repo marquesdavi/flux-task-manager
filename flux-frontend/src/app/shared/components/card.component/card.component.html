@@ -1,0 +1,20 @@
+<div
+  cdkDrag
+  class="flex items-stretch justify-between gap-4 rounded-lg p-4 bg-[#1e2832] hover:bg-[#223046] cursor-grab"
+>
+  <div class="flex flex-col gap-1 flex-[2_2_0px]">
+    <p class="text-white font-bold">{{ title }}</p>
+    <p class="text-[#93b0c8] text-sm">{{ description }}</p>
+  </div>
+
+<!--  @if (imageUrl) {-->
+<!--    <div-->
+<!--      class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg flex-1"-->
+<!--      [style.backgroundImage]="'url(' + imageUrl + ')'"-->
+<!--    ></div>-->
+<!--  }-->
+
+  <div class="flex flex-col justify-start gap-2">
+    <button (click)="edit.emit()"  class="text-xs text-white hover:underline"><app-material-symbol size="16px">edit</app-material-symbol></button>
+  </div>
+</div>
