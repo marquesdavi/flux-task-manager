@@ -3,41 +3,40 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable, tap } from 'rxjs';
-import {environment} from '../../environments/environment.development';
+import {environment} from '../../environments/environment';
+import {TokenResponse} from '../models/auth';
 
-interface LoginRequest { email: string; password: string; }
-interface TokenResponse { token: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-  constructor(
-    private http: HttpClient,
-    private cookieService: CookieService,
-    private router: Router
-  ) {}
+    constructor(
+        private http: HttpClient,
+        private cookieService: CookieService,
+        private router: Router
+    ) {}
 
-  login(email: string, password: string): Observable<TokenResponse> {
-    return this.http
-      .post<TokenResponse>(`${environment.api}/auth`, { email, password })
-      .pipe(
-        tap(res => {
-          this.cookieService.set('accessToken', res.token, { path: '/' });
-        })
-      );
-  }
-
-  logout(): void {
-    if (confirm('Ao sair, seus dados serão perdidos. Continuar?')) {
-      this.cookieService.delete('accessToken', '/');
-      this.router.navigate(['/login']);
+    login(email: string, password: string): Observable<TokenResponse> {
+        return this.http
+            .post<TokenResponse>(`${environment.api}/auth/login`, { email, password })
+            .pipe(
+                tap(res => {
+                    this.cookieService.set('accessToken', res.accessToken, { path: '/' });
+                })
+            );
     }
-  }
 
-  get token(): string {
-    return this.cookieService.get('accessToken') || '';
-  }
+    logout(): void {
+        if (confirm('Ao sair, seus dados serão perdidos. Continuar?')) {
+            this.cookieService.delete('accessToken', '/');
+            this.router.navigate(['/login']);
+        }
+    }
 
-  isLoggedIn(): boolean {
-    return !!this.token;
-  }
+    get token(): string {
+        return this.cookieService.get('accessToken') || '';
+    }
+
+    isLoggedIn(): boolean {
+        return !!this.token;
+    }
 }
