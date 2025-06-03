@@ -1,0 +1,16 @@
+<div
+  #layoutWrapper
+  class="min-h-screen flex flex-col bg-[#111a22] text-white"
+>
+  <!-- Topo fixo -->
+  <app-navbar></app-navbar>
+
+  <!-- Conteúdo principal -->
+  <main class="flex-1 overflow-auto px-6 py-8">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer sempre na base -->
+  <app-footer></app-footer>
+</div>
+
