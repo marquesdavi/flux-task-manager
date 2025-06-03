@@ -1,0 +1,90 @@
+<!-- src/app/features/register-page/register-page.component.html -->
+
+<div class="min-h-screen flex items-center justify-center bg-[#111a22] px-4">
+  <div class="w-full max-w-md bg-[#1f2933] rounded-lg shadow-lg p-8">
+    <h2 class="text-3xl font-bold text-white text-center mb-6">Flux • Registrar</h2>
+
+    @if (successSignal()) {
+      <div class="mb-4 text-center text-green-400">
+        {{ successSignal() }}
+      </div>
+    }
+
+    @if (errorSignal()) {
+      <div class="mb-4 text-center text-red-500">
+        {{ errorSignal() }}
+      </div>
+    }
+
+    @if (loadingSignal()) {
+      <div class="mb-4 text-center text-gray-400">
+        Criando conta...
+      </div>
+    } @else {
+      <div class="flex flex-col gap-5">
+        <div>
+          <label class="block text-gray-300 mb-1">Usuário</label>
+          <input
+            type="text"
+            [value]="usernameSignal()"
+            (input)="usernameSignal.set($any($event.target).value)"
+            placeholder="Digite seu nome de usuário"
+            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-300 mb-1">Email</label>
+          <input
+            type="email"
+            [value]="emailSignal()"
+            (input)="emailSignal.set($any($event.target).value)"
+            placeholder="Digite seu email"
+            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-300 mb-1">Senha</label>
+          <input
+            type="password"
+            [value]="passwordSignal()"
+            (input)="passwordSignal.set($any($event.target).value)"
+            placeholder="Digite sua senha"
+            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-gray-300 mb-1">Confirmar Senha</label>
+          <input
+            type="password"
+            [value]="confirmPasswordSignal()"
+            (input)="confirmPasswordSignal.set($any($event.target).value)"
+            placeholder="Confirme sua senha"
+            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+          />
+        </div>
+
+        <button
+          (click)="register()"
+          class="w-full bg-[#007bff] hover:bg-[#005bb5] text-white font-semibold
+                 px-4 py-2 rounded transition-colors"
+        >
+          Registrar
+        </button>
+
+        <p class="text-center text-gray-400 mt-4">
+          Já tem uma conta?
+          <a routerLink="/login" class="text-[#1989e5] hover:underline">
+            Entre aqui
+          </a>
+        </p>
+      </div>
+    }
+  </div>
+</div>
