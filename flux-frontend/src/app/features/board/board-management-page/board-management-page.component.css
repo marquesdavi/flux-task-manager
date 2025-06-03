@@ -1,0 +1,11 @@
+/* src/app/pages/boards-page/boards-page.component.css */
+
+/* Se quiser garantir que os inputs não ampliem demais */
+input {
+  outline: none;
+}
+
+/* Dimensão mínima dos “tiles” de board */
+div[group] > div {
+  min-height: 150px;
+}
