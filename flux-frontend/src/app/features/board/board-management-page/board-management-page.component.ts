@@ -4,7 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { BoardService }     from '../../../core/service/board.service';
 import { Board }            from '../../../core/models/board';
 import { FormsModule }      from '@angular/forms';
-import {MaterialSymbolComponent} from '../../../shared/layout/material-symbol.component/material-symbol.component';
+import { MaterialSymbolComponent } from '../../../shared/layout/material-symbol.component/material-symbol.component';
 
 @Component({
   selector: 'app-boards-page',
@@ -19,16 +19,20 @@ import {MaterialSymbolComponent} from '../../../shared/layout/material-symbol.co
   styleUrls: ['./board-management-page.component.css']
 })
 export class BoardManagementPageComponent {
+  // injetando o serviço e o Router
   private boardService = inject(BoardService);
   private router       = inject(Router);
 
+  // → sinais para lista de boards e estado de carregamento
   boardsSignal        = signal<Board[]>([]);
   loadingSignal       = signal(true);
 
+  // → sinais para criar novo board
   showNewInputSignal  = signal(false);
   newBoardTitleSignal = signal('');
   newBoardErrorSignal = signal('');
 
+  // → sinais para edição inline de um board
   editingIdSignal     = signal<string | null>(null);
   editTitleSignal     = signal('');
   editErrorSignal     = signal('');
@@ -79,9 +83,8 @@ export class BoardManagementPageComponent {
 
   createBoard(): void {
     this.newBoardErrorSignal.set('');
-    if (!this.validateNewTitle()) {
-      return;
-    }
+    if (!this.validateNewTitle()) return;
+
     const title = this.newBoardTitleSignal().trim();
     this.boardService.create(title).subscribe({
       next: (created: Board) => {
@@ -133,9 +136,8 @@ export class BoardManagementPageComponent {
 
   saveEdit(board: Board): void {
     this.editErrorSignal.set('');
-    if (!this.validateEditTitle()) {
-      return;
-    }
+    if (!this.validateEditTitle()) return;
+
     const newTitle = this.editTitleSignal().trim();
     this.boardService.rename(board.id, newTitle).subscribe({
       next: (updated: Board) => {
