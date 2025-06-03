@@ -1,11 +1,10 @@
-package com.todo.flux.module.user.service;
+package com.todo.flux.module.user.service.impl;
 
 import com.todo.flux.exception.AlreadyExistsException;
 import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.user.dto.RegisterRequest;
 import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.repository.UserRepository;
-import com.todo.flux.module.user.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +39,7 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("create")
-    class CreateTests {
+    class Create {
 
         @Test
         @DisplayName("shouldCreateUser_WhenEmailDoesNotExist")
@@ -69,7 +68,7 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("existsByEmail")
-    class ExistsByEmailTests {
+    class ExistsByEmail {
 
         @Test
         @DisplayName("shouldThrowAlreadyExistsException_WhenEmailExists")
@@ -88,7 +87,7 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("findByEmail")
-    class FindByEmailTests {
+    class FindByEmail {
 
         @Test
         @DisplayName("shouldReturnUser_WhenUserExists")
@@ -122,7 +121,7 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("findByIdOrElseThrow")
-    class FindByIdOrElseThrowTests {
+    class FindByIdOrElseThrow {
 
         @Test
         @DisplayName("shouldReturnUser_WhenUserExists")
