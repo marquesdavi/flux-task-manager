@@ -20,8 +20,7 @@ public class CorsConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOriginPatterns(List.of("*"));
-        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of(defaultAccessOrigin, "http://localhost:8080"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

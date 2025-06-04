@@ -55,15 +55,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authorize -> authorize
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
                                 .requestMatchers(AUTH_WHITE_LIST).permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(
