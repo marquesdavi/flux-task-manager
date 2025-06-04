@@ -1,4 +1,3 @@
-// src/app/features/board/kanban-page/kanban-page.component.ts
 import {
     Component,
     ElementRef,
@@ -27,8 +26,8 @@ import {
     CardAssignRequest
 } from '../../../core/models/card';
 import { DialogService } from '../../../core/service/dialog.service';
-import {UserSummary} from '../../../core/models/user';
-import {UserService} from '../../../core/service/user.service';
+import { UserSummary } from '../../../core/models/user';
+import { UserService } from '../../../core/service/user.service';
 
 interface Task {
     id: string;
@@ -37,6 +36,8 @@ interface Task {
     descriptionFull: string;
     imageUrl: string | null;
     status: 'TODO' | 'DOING' | 'DONE';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | null;
+    assigneeEmail: string | null;
     startDate: string;
     endDate: string;
     dueDate: string;
@@ -81,6 +82,13 @@ export class KanbanPageComponent implements OnInit {
 
     collaborators: UserSummary[] = [];
 
+    filterTitle: string = '';
+    filterAssignee: string = '';
+    filterStatus: string = '';
+    filterPriority: string = '';
+
+    private allTasks: Task[] = [];
+
     @ViewChildren('newCardInput') newCardInputs!: QueryList<ElementRef<HTMLInputElement>>;
     private boardId!: string;
 
@@ -93,36 +101,72 @@ export class KanbanPageComponent implements OnInit {
 
     ngOnInit(): void {
         this.boardId = this.route.snapshot.paramMap.get('id')!;
+        this.loadCollaborators();
+
         this.loadCards();
+    }
+
+    private loadCollaborators(): void {
+        this.userService.getUsersByBoardId(this.boardId).subscribe({
+            next: (users: UserSummary[]) => {
+                this.collaborators = users;
+            },
+            error: () => {
+                this.collaborators = [];
+            }
+        });
     }
 
     private loadCards(): void {
         this.cardService.getAllByBoard(this.boardId).subscribe({
             next: (cards: CardResponse[]) => {
-                this.columns.forEach(col => (col.tasks = []));
-                cards.forEach(card => {
-                    const task: Task = {
-                        id: card.id,
-                        title: card.title,
-                        descriptionBrief: card.descriptionBrief,
-                        descriptionFull: card.descriptionFull,
-                        imageUrl: card.imageUrl,
-                        status: card.status as 'TODO' | 'DOING' | 'DONE',
-                        startDate: card.startDate,
-                        endDate: card.endDate,
-                        dueDate: card.dueDate
-                    };
-                    const col = this.columns.find(c => c.title === task.status);
-                    if (col) {
-                        col.tasks.push(task);
-                    }
-                });
+                this.allTasks = cards.map(card => ({
+                    id: card.id,
+                    title: card.title,
+                    descriptionBrief: card.descriptionBrief,
+                    descriptionFull: card.descriptionFull,
+                    imageUrl: card.imageUrl,
+                    status: card.status as 'TODO' | 'DOING' | 'DONE',
+                    priority: card.priority as 'LOW' | 'MEDIUM' | 'HIGH' | null,
+                    assigneeEmail: card.assigneeEmail,
+                    startDate: card.startDate,
+                    endDate: card.endDate,
+                    dueDate: card.dueDate
+                }));
+
+                this.applyFilters();
             },
             error: () => {
+                this.allTasks = [];
                 this.columns.forEach(col => (col.tasks = []));
             }
         });
     }
+
+    applyFilters(): void {
+        this.columns.forEach(col => (col.tasks = []));
+        const titleFilter = this.filterTitle.trim().toLowerCase();
+
+        this.allTasks.forEach(task => {
+            if (titleFilter && !task.title.toLowerCase().includes(titleFilter)) {
+                return;
+            }
+            if (this.filterAssignee && task.assigneeEmail !== this.filterAssignee) {
+                return;
+            }
+            if (this.filterStatus && task.status !== this.filterStatus) {
+                return;
+            }
+            if (this.filterPriority && task.priority !== this.filterPriority) {
+                return;
+            }
+            const col = this.columns.find(c => c.title === task.status);
+            if (col) {
+                col.tasks.push(task);
+            }
+        });
+    }
+
 
     formatStatusDisplay(status: 'TODO' | 'DOING' | 'DONE'): string {
         switch (status) {
@@ -159,32 +203,30 @@ export class KanbanPageComponent implements OnInit {
             descriptionBrief: dragged.descriptionBrief,
             descriptionFull: dragged.descriptionFull,
             startDate: dragged.startDate,
+            priority: dragged.priority!,
             endDate: dragged.endDate,
             dueDate: dragged.dueDate,
             imageUrl: dragged.imageUrl ?? undefined
         };
         this.cardService.update(dragged.id, updatePayload).subscribe({
             next: (updated: CardResponse) => {
-                const previousColumn = this.columns.find(c => c.tasks.some(t => t.id === updated.id));
-                if (previousColumn) {
-                    const idxOld = previousColumn.tasks.findIndex(t => t.id === updated.id);
-                    previousColumn.tasks.splice(idxOld, 1);
-                }
-                const newStatusColumn = this.columns.find(c => c.title === updated.status);
-                if (newStatusColumn) {
-                    const newTask: Task = {
+                const idxAll = this.allTasks.findIndex(t => t.id === updated.id);
+                if (idxAll > -1) {
+                    this.allTasks[idxAll] = {
                         id: updated.id,
                         title: updated.title,
                         descriptionBrief: updated.descriptionBrief,
                         descriptionFull: updated.descriptionFull,
                         imageUrl: updated.imageUrl,
-                        status: updated.status,
+                        status: updated.status as 'TODO' | 'DOING' | 'DONE',
+                        priority: updated.priority as 'LOW' | 'MEDIUM' | 'HIGH' | null,
+                        assigneeEmail: updated.assigneeEmail,
                         startDate: updated.startDate,
                         endDate: updated.endDate,
                         dueDate: updated.dueDate
                     };
-                    newStatusColumn.tasks.unshift(newTask);
                 }
+                this.applyFilters();
             },
             error: () => {
                 this.loadCards();
@@ -226,12 +268,17 @@ export class KanbanPageComponent implements OnInit {
                     descriptionBrief: created.descriptionBrief,
                     descriptionFull: created.descriptionFull,
                     imageUrl: created.imageUrl,
-                    status: created.status,
+                    status: created.status as 'TODO' | 'DOING' | 'DONE',
+                    priority: created.priority as 'LOW' | 'MEDIUM' | 'HIGH' | null,
+                    assigneeEmail: created.assigneeEmail,
                     startDate: created.startDate,
                     endDate: created.endDate,
                     dueDate: created.dueDate
                 };
-                this.columns[colIndex].tasks.unshift(newTask);
+
+                this.allTasks.unshift(newTask);
+                this.applyFilters();
+
                 this.showNewCardInput[colIndex] = false;
                 this.newCardTitle[colIndex] = '';
                 this.newCardError[colIndex] = '';
@@ -240,10 +287,6 @@ export class KanbanPageComponent implements OnInit {
                 this.newCardError[colIndex] = 'Não foi possível criar card.';
             }
         });
-    }
-
-    trackById(index: number, item: Task) {
-        return item.id;
     }
 
     onCardInputKeyDown(event: KeyboardEvent, colIndex: number): void {
@@ -269,16 +312,6 @@ export class KanbanPageComponent implements OnInit {
                 this.modalData = resp;
                 this.assigneeEmailForAssign = resp.assigneeEmail || '';
                 this.assignError = '';
-
-                this.userService.getUsersByBoardId(this.boardId).subscribe({
-                    next: (users: UserSummary[]) => {
-                        this.collaborators = users;
-                    },
-                    error: () => {
-                        this.collaborators = [];
-                    }
-                });
-
                 this.showModal = true;
             },
             error: () => {
@@ -311,36 +344,30 @@ export class KanbanPageComponent implements OnInit {
             descriptionFull: this.modalData.descriptionFull,
             status: this.modalData.status,
             startDate: this.modalData.startDate,
+            priority: this.modalData.priority as 'LOW' | 'MEDIUM' | 'HIGH',
             endDate: this.modalData.endDate,
             dueDate: this.modalData.dueDate,
             imageUrl: this.modalData.imageUrl ?? undefined
         };
         this.cardService.update(this.modalTaskId, payload).subscribe({
             next: (updated: CardResponse) => {
-                // Remover da coluna antiga
-                const previousColumn = this.columns.find(c =>
-                    c.tasks.some(t => t.id === updated.id)
-                );
-                if (previousColumn) {
-                    const idxOld = previousColumn.tasks.findIndex(t => t.id === updated.id);
-                    previousColumn.tasks.splice(idxOld, 1);
-                }
-                // Adicionar na coluna de status atualizado
-                const destinationColumn = this.columns.find(c => c.title === updated.status);
-                if (destinationColumn) {
-                    const newTask: Task = {
+                const idxAll = this.allTasks.findIndex(t => t.id === updated.id);
+                if (idxAll > -1) {
+                    this.allTasks[idxAll] = {
                         id: updated.id,
                         title: updated.title,
                         descriptionBrief: updated.descriptionBrief,
                         descriptionFull: updated.descriptionFull,
                         imageUrl: updated.imageUrl,
-                        status: updated.status,
+                        status: updated.status as 'TODO' | 'DOING' | 'DONE',
+                        priority: updated.priority as 'LOW' | 'MEDIUM' | 'HIGH' | null,
+                        assigneeEmail: updated.assigneeEmail,
                         startDate: updated.startDate,
                         endDate: updated.endDate,
                         dueDate: updated.dueDate
                     };
-                    destinationColumn.tasks.unshift(newTask);
                 }
+                this.applyFilters();
                 this.closeModal();
             },
             error: () => {
@@ -349,10 +376,8 @@ export class KanbanPageComponent implements OnInit {
         });
     }
 
-    // ←–––––– MÉTODO NOVO: dispara o PATCH /cards/{cardId}/assign
     assignUser(): void {
         this.assignError = '';
-
         if (!this.assigneeEmailForAssign?.trim()) {
             this.assignError = 'E-mail não pode ficar em branco.';
             return;
@@ -361,20 +386,17 @@ export class KanbanPageComponent implements OnInit {
             this.assignError = 'Nenhum card selecionado.';
             return;
         }
-
         const body: CardAssignRequest = {
             email: this.assigneeEmailForAssign.trim()
         };
-
         this.cardService.assign(this.modalTaskId, body).subscribe({
             next: (updated: CardResponse) => {
-                if (this.modalData) {
-                    this.modalData = {
-                        ...this.modalData,
-                        assigneeEmail: updated.assigneeEmail
-                    };
+                const idxAll = this.allTasks.findIndex(t => t.id === updated.id);
+                if (idxAll > -1) {
+                    this.allTasks[idxAll].assigneeEmail = updated.assigneeEmail;
                 }
                 this.assigneeEmailForAssign = updated.assigneeEmail || '';
+                this.applyFilters();
                 this.assignError = '';
             },
             error: err => {
@@ -383,24 +405,14 @@ export class KanbanPageComponent implements OnInit {
         });
     }
 
-    onAction(label: string): void {
-        console.log('[onAction] argument:', label);
-    }
-
     async deleteCard(cardId: string) {
-        if (
-            !await this.dialogService.confirm('Você tem certeza que deseja excluir este card?')
-        ) {
+        if (!await this.dialogService.confirm('Você tem certeza que deseja excluir este card?')) {
             return;
         }
         this.cardService.delete(cardId).subscribe({
             next: () => {
-                this.columns.forEach(col => {
-                    const idx = col.tasks.findIndex(t => t.id === cardId);
-                    if (idx > -1) {
-                        col.tasks.splice(idx, 1);
-                    }
-                });
+                this.allTasks = this.allTasks.filter(t => t.id !== cardId);
+                this.applyFilters();
             },
             error: () => {
                 this.dialogService.alert('Falha ao excluir card.');

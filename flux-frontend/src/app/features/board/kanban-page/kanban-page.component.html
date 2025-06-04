@@ -1,253 +1,308 @@
-<div
-    class="px-6 py-5 bg-[#111a22] flex-1 w-full h-full"
-    style="font-family: Inter, 'Noto Sans', sans-serif;"
->
-    <div class="flex flex-row gap-6 overflow-x-auto" cdkDropListGroup>
-        <!-- Coluna “TODO” -->
-        <div
-            cdkDropList
-            #dropListToDo="cdkDropList"
-            [cdkDropListData]="columns[0].tasks"
-            [cdkDropListConnectedTo]="[dropListDoing, dropListDone]"
-            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
-            (cdkDropListDropped)="drop($event)"
-        >
-            <!-- Cabeçalho exibe “A fazer” -->
-            <app-column-header [title]="formatStatusDisplay(columns[0].title)">
-                <app-add-card-button
-                    add-button
-                    [label]="'Add'"
-                    (clickAdd)="onAddCardClick(0)"
-                ></app-add-card-button>
-            </app-column-header>
+<div class="px-6 py-5 bg-[#111a22] flex-1 w-full h-full"
+     style="font-family: Inter, 'Noto Sans', sans-serif;">
+    <div class="max-w-7xl mx-auto">
 
-            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
-                @if (showNewCardInput[0]) {
-                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
-                        <input
-                            #newCardInput
-                            type="text"
-                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
-                                   focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
-                                   placeholder:text-[#93b0c8]"
-                            placeholder="Digite o título do card…"
-                            [(ngModel)]="newCardTitle[0]"
-                            (keydown)="onCardInputKeyDown($event, 0)"
-                        />
-                        <div class="mt-2 flex items-center gap-2">
-                            <button
-                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
-                                       hover:bg-[#005bb5] transition-colors"
-                                (click)="onCreateCard(0)"
-                            >
-                                Create card
-                            </button>
-                            <button
-                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
-                                       transition-colors"
-                                (click)="onCancelCard(0)"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                        @if (newCardError[0]) {
-                            <p class="mt-1 text-sm text-red-500">
-                                {{ newCardError[0] }}
-                            </p>
-                        }
-                    </div>
-                }
+        <div class="mb-6 flex flex-col md:flex-row gap-4">
+            <div class="flex flex-col flex-1 md:flex-[2]">
+                <label class="text-sm text-[#93b0c8] mb-1">Pesquisar Título</label>
+                <input
+                    type="text"
+                    class="bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
+                 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                    placeholder="Digite parte do título…"
+                    [(ngModel)]="filterTitle"
+                    (input)="applyFilters()"
+                />
+            </div>
+            <div class="flex flex-col">
+                <label class="text-sm text-[#93b0c8] mb-1">Responsável</label>
+                <select
+                    class="bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
+                 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                    [(ngModel)]="filterAssignee"
+                    (change)="applyFilters()"
+                >
+                    <option class="text-black" value="">Todos</option>
+                    @for (user of collaborators; track user.id) {
+                        <option class="text-black" [value]="user.email">
+                            {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+                        </option>
+                    }
+                </select>
+            </div>
 
-                <!-- Lista de cards -->
-                @for (task of columns[0].tasks; track task.id) {
-                    <div
-                        cdkDrag
-                        [cdkDragData]="task"
-                        (click)="openModal(task.id); $event.stopPropagation()"
-                        class="cursor-pointer"
-                    >
-                        <app-card
-                            [title]="task.title"
-                            [description]="task.descriptionBrief"
-                            [imageUrl]="task.imageUrl"
-                            (clickCard)="openModal(task.id)"
-                            (edit)="openModal(task.id)"
-                            (delete)="deleteCard(task.id)"
-                        ></app-card>
-                    </div>
-                }
+            <div class="flex flex-col">
+                <label class="text-sm text-[#93b0c8] mb-1">Status</label>
+                <select
+                    class="bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
+                 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                    [(ngModel)]="filterStatus"
+                    (change)="applyFilters()"
+                >
+                    <option class="text-black" value="">Todos</option>
+                    <option class="text-black" value="TODO">A fazer</option>
+                    <option class="text-black" value="DOING">Em andamento</option>
+                    <option class="text-black" value="DONE">Pronto</option>
+                </select>
+            </div>
 
-                <!-- Se não houver cards -->
-                @if (!columns[0].tasks.length && !showNewCardInput[0]) {
-                    <p class="text-[#93b0c8]">
-                        Nenhum card em {{ formatStatusDisplay(columns[0].title) }}
-                    </p>
-                }
+            <!-- FILTRO: Prioridade -->
+            <div class="flex flex-col">
+                <label class="text-sm text-[#93b0c8] mb-1">Prioridade</label>
+                <select
+                    class="bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
+                 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                    [(ngModel)]="filterPriority"
+                    (change)="applyFilters()"
+                >
+                    <option class="text-black" value="">Todos</option>
+                    <option class="text-black" value="LOW">Baixa</option>
+                    <option class="text-black" value="MEDIUM">Média</option>
+                    <option class="text-black" value="HIGH">Alta</option>
+                </select>
             </div>
         </div>
 
-        <!-- Coluna “DOING” -->
-        <div
-            cdkDropList
-            #dropListDoing="cdkDropList"
-            [cdkDropListData]="columns[1].tasks"
-            [cdkDropListConnectedTo]="[dropListToDo, dropListDone]"
-            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
-            (cdkDropListDropped)="drop($event)"
-        >
-            <app-column-header [title]="formatStatusDisplay(columns[1].title)">
-                <app-add-card-button
-                    add-button
-                    [label]="'Add'"
-                    (clickAdd)="onAddCardClick(1)"
-                ></app-add-card-button>
-            </app-column-header>
+        <div class="flex flex-row gap-6 overflow-x-auto" cdkDropListGroup>
+            <div
+                cdkDropList
+                #dropListToDo="cdkDropList"
+                [cdkDropListData]="columns[0].tasks"
+                [cdkDropListConnectedTo]="[dropListDoing, dropListDone]"
+                class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+                (cdkDropListDropped)="drop($event)"
+            >
+                <app-column-header [title]="formatStatusDisplay(columns[0].title)">
+                    <app-add-card-button
+                        add-button
+                        [label]="'Add'"
+                        (clickAdd)="onAddCardClick(0)"
+                    ></app-add-card-button>
+                </app-column-header>
 
-            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
-                @if (showNewCardInput[1]) {
-                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
-                        <input
-                            #newCardInput
-                            type="text"
-                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
-                                   focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
-                                   placeholder:text-[#93b0c8]"
-                            placeholder="Digite o título do card…"
-                            [(ngModel)]="newCardTitle[1]"
-                            (keydown)="onCardInputKeyDown($event, 1)"
-                        />
-                        <div class="mt-2 flex items-center gap-2">
-                            <button
-                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
-                                       hover:bg-[#005bb5] transition-colors"
-                                (click)="onCreateCard(1)"
-                            >
-                                Create card
-                            </button>
-                            <button
-                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
-                                       transition-colors"
-                                (click)="onCancelCard(1)"
-                            >
-                                Cancel
-                            </button>
+                <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                    @if (showNewCardInput[0]) {
+                        <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                            <input
+                                #newCardInput
+                                type="text"
+                                class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                       focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                       placeholder:text-[#93b0c8]"
+                                placeholder="Digite o título do card…"
+                                [(ngModel)]="newCardTitle[0]"
+                                (keydown)="onCardInputKeyDown($event, 0)"
+                            />
+                            <div class="mt-2 flex items-center gap-2">
+                                <button
+                                    class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                         hover:bg-[#005bb5] transition-colors"
+                                    (click)="onCreateCard(0)"
+                                >
+                                    Create card
+                                </button>
+                                <button
+                                    class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                         transition-colors"
+                                    (click)="onCancelCard(0)"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                            @if (newCardError[0]) {
+                                <p class="mt-1 text-sm text-red-500">
+                                    {{ newCardError[0] }}
+                                </p>
+                            }
                         </div>
-                        @if (newCardError[1]) {
-                            <p class="mt-1 text-sm text-red-500">
-                                {{ newCardError[1] }}
-                            </p>
-                        }
-                    </div>
-                }
+                    }
 
-                @for (task of columns[1].tasks; track task.id) {
-                    <div
-                        cdkDrag
-                        [cdkDragData]="task"
-                        (click)="openModal(task.id); $event.stopPropagation()"
-                        class="cursor-pointer"
-                    >
-                        <app-card
-                            [title]="task.title"
-                            [description]="task.descriptionBrief"
-                            [imageUrl]="task.imageUrl"
-                            (clickCard)="openModal(task.id)"
-                            (edit)="openModal(task.id)"
-                            (delete)="deleteCard(task.id)"
-                        ></app-card>
-                    </div>
-                }
+                    @for (task of columns[0].tasks; track task.id) {
+                        <div
+                            cdkDrag
+                            [cdkDragData]="task"
+                            (click)="openModal(task.id); $event.stopPropagation()"
+                            class="cursor-pointer"
+                        >
+                            <app-card
+                                [title]="task.title"
+                                [description]="task.descriptionBrief"
+                                [imageUrl]="task.imageUrl"
+                                (clickCard)="openModal(task.id)"
+                                (edit)="openModal(task.id)"
+                                (delete)="deleteCard(task.id)"
+                            ></app-card>
+                        </div>
+                    }
 
-                @if (!columns[1].tasks.length && !showNewCardInput[1]) {
-                    <p class="text-[#93b0c8]">
-                        Nenhum card em {{ formatStatusDisplay(columns[1].title) }}
-                    </p>
-                }
+                    @if (!columns[0].tasks.length && !showNewCardInput[0]) {
+                        <p class="text-[#93b0c8]">
+                            Nenhum card em {{ formatStatusDisplay(columns[0].title) }}
+                        </p>
+                    }
+                </div>
             </div>
-        </div>
 
-        <!-- Coluna “DONE” -->
-        <div
-            cdkDropList
-            #dropListDone="cdkDropList"
-            [cdkDropListData]="columns[2].tasks"
-            [cdkDropListConnectedTo]="[dropListToDo, dropListDoing]"
-            class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
-            (cdkDropListDropped)="drop($event)"
-        >
-            <app-column-header [title]="formatStatusDisplay(columns[2].title)">
-                <app-add-card-button
-                    add-button
-                    [label]="'Add'"
-                    (clickAdd)="onAddCardClick(2)"
-                ></app-add-card-button>
-            </app-column-header>
+            <div
+                cdkDropList
+                #dropListDoing="cdkDropList"
+                [cdkDropListData]="columns[1].tasks"
+                [cdkDropListConnectedTo]="[dropListToDo, dropListDone]"
+                class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+                (cdkDropListDropped)="drop($event)"
+            >
+                <app-column-header [title]="formatStatusDisplay(columns[1].title)">
+                    <app-add-card-button
+                        add-button
+                        [label]="'Add'"
+                        (clickAdd)="onAddCardClick(1)"
+                    ></app-add-card-button>
+                </app-column-header>
 
-            <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
-                @if (showNewCardInput[2]) {
-                    <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
-                        <input
-                            #newCardInput
-                            type="text"
-                            class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
-                                   focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
-                                   placeholder:text-[#93b0c8]"
-                            placeholder="Digite o título do card…"
-                            [(ngModel)]="newCardTitle[2]"
-                            (keydown)="onCardInputKeyDown($event, 2)"
-                        />
-                        <div class="mt-2 flex items-center gap-2">
-                            <button
-                                class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
-                                       hover:bg-[#005bb5] transition-colors"
-                                (click)="onCreateCard(2)"
-                            >
-                                Create card
-                            </button>
-                            <button
-                                class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
-                                       transition-colors"
-                                (click)="onCancelCard(2)"
-                            >
-                                Cancel
-                            </button>
+                <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                    @if (showNewCardInput[1]) {
+                        <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                            <input
+                                #newCardInput
+                                type="text"
+                                class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                       focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                       placeholder:text-[#93b0c8]"
+                                placeholder="Digite o título do card…"
+                                [(ngModel)]="newCardTitle[1]"
+                                (keydown)="onCardInputKeyDown($event, 1)"
+                            />
+                            <div class="mt-2 flex items-center gap-2">
+                                <button
+                                    class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                         hover:bg-[#005bb5] transition-colors"
+                                    (click)="onCreateCard(1)"
+                                >
+                                    Create card
+                                </button>
+                                <button
+                                    class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                         transition-colors"
+                                    (click)="onCancelCard(1)"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                            @if (newCardError[1]) {
+                                <p class="mt-1 text-sm text-red-500">
+                                    {{ newCardError[1] }}
+                                </p>
+                            }
                         </div>
-                        @if (newCardError[2]) {
-                            <p class="mt-1 text-sm text-red-500">
-                                {{ newCardError[2] }}
-                            </p>
-                        }
-                    </div>
-                }
+                    }
 
-                @for (task of columns[2].tasks; track task.id) {
-                    <div
-                        cdkDrag
-                        [cdkDragData]="task"
-                        (click)="openModal(task.id); $event.stopPropagation()"
-                        class="cursor-pointer"
-                    >
-                        <app-card
-                            [title]="task.title"
-                            [description]="task.descriptionBrief"
-                            [imageUrl]="task.imageUrl"
-                            (clickCard)="openModal(task.id)"
-                            (edit)="openModal(task.id)"
-                            (delete)="deleteCard(task.id)"
-                        ></app-card>
-                    </div>
-                }
+                    @for (task of columns[1].tasks; track task.id) {
+                        <div
+                            cdkDrag
+                            [cdkDragData]="task"
+                            (click)="openModal(task.id); $event.stopPropagation()"
+                            class="cursor-pointer"
+                        >
+                            <app-card
+                                [title]="task.title"
+                                [description]="task.descriptionBrief"
+                                [imageUrl]="task.imageUrl"
+                                (clickCard)="openModal(task.id)"
+                                (edit)="openModal(task.id)"
+                                (delete)="deleteCard(task.id)"
+                            ></app-card>
+                        </div>
+                    }
 
-                @if (!columns[2].tasks.length && !showNewCardInput[2]) {
-                    <p class="text-[#93b0c8]">
-                        Nenhum card em {{ formatStatusDisplay(columns[2].title) }}
-                    </p>
-                }
+                    @if (!columns[1].tasks.length && !showNewCardInput[1]) {
+                        <p class="text-[#93b0c8]">
+                            Nenhum card em {{ formatStatusDisplay(columns[1].title) }}
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <div
+                cdkDropList
+                #dropListDone="cdkDropList"
+                [cdkDropListData]="columns[2].tasks"
+                [cdkDropListConnectedTo]="[dropListToDo, dropListDoing]"
+                class="flex flex-col bg-[#161f29] rounded-lg min-w-[280px] w-full p-4"
+                (cdkDropListDropped)="drop($event)"
+            >
+                <app-column-header [title]="formatStatusDisplay(columns[2].title)">
+                    <app-add-card-button
+                        add-button
+                        [label]="'Add'"
+                        (clickAdd)="onAddCardClick(2)"
+                    ></app-add-card-button>
+                </app-column-header>
+
+                <div class="flex flex-col gap-4 flex-1 overflow-y-auto">
+                    @if (showNewCardInput[2]) {
+                        <div class="bg-[#161f29] rounded-lg border border-[#27303a] p-4 mb-2">
+                            <input
+                                #newCardInput
+                                type="text"
+                                class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-2 py-2
+                       focus:outline-none focus:ring-2 focus:ring-[#007bff] text-[#e5e5e5]
+                       placeholder:text-[#93b0c8]"
+                                placeholder="Digite o título do card…"
+                                [(ngModel)]="newCardTitle[2]"
+                                (keydown)="onCardInputKeyDown($event, 2)"
+                            />
+                            <div class="mt-2 flex items-center gap-2">
+                                <button
+                                    class="bg-[#007bff] text-white font-semibold px-4 py-2 rounded
+                         hover:bg-[#005bb5] transition-colors"
+                                    (click)="onCreateCard(2)"
+                                >
+                                    Create card
+                                </button>
+                                <button
+                                    class="text-[#93b0c8] hover:text-white font-medium px-3 py-2 rounded
+                         transition-colors"
+                                    (click)="onCancelCard(2)"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                            @if (newCardError[2]) {
+                                <p class="mt-1 text-sm text-red-500">
+                                    {{ newCardError[2] }}
+                                </p>
+                            }
+                        </div>
+                    }
+
+                    @for (task of columns[2].tasks; track task.id) {
+                        <div
+                            cdkDrag
+                            [cdkDragData]="task"
+                            (click)="openModal(task.id); $event.stopPropagation()"
+                            class="cursor-pointer"
+                        >
+                            <app-card
+                                [title]="task.title"
+                                [description]="task.descriptionBrief"
+                                [imageUrl]="task.imageUrl"
+                                (clickCard)="openModal(task.id)"
+                                (edit)="openModal(task.id)"
+                                (delete)="deleteCard(task.id)"
+                            ></app-card>
+                        </div>
+                    }
+
+                    @if (!columns[2].tasks.length && !showNewCardInput[2]) {
+                        <p class="text-[#93b0c8]">
+                            Nenhum card em {{ formatStatusDisplay(columns[2].title) }}
+                        </p>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 
 @if (showModal) {
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -262,7 +317,6 @@
 
             @if (modalData) {
                 <div class="flex flex-col gap-4">
-                    <!-- Título -->
                     <div>
                         <label class="block text-gray-300 mb-1">Título</label>
                         <input
@@ -273,7 +327,6 @@
                         />
                     </div>
 
-                    <!-- Descrição Breve -->
                     <div>
                         <label class="block text-gray-300 mb-1">Descrição Breve</label>
                         <textarea
@@ -284,7 +337,6 @@
                         ></textarea>
                     </div>
 
-                    <!-- Descrição Completa -->
                     <div>
                         <label class="block text-gray-300 mb-1">Descrição Completa</label>
                         <textarea
@@ -295,7 +347,6 @@
                         ></textarea>
                     </div>
 
-                    <!-- Status -->
                     <div>
                         <label class="block text-gray-300 mb-1">Status</label>
                         <select
@@ -309,7 +360,19 @@
                         </select>
                     </div>
 
-                    <!-- Data de Início -->
+                    <div>
+                        <label class="block text-gray-300 mb-1">Prioridade</label>
+                        <select
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                            [(ngModel)]="modalData.priority"
+                        >
+                            <option class="text-black" value="LOW">Baixa</option>
+                            <option class="text-black" value="MEDIUM">Média</option>
+                            <option class="text-black" value="HIGH">Alta</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-gray-300 mb-1">Data de Início</label>
                         <input
@@ -320,7 +383,6 @@
                         />
                     </div>
 
-                    <!-- Data de Fim -->
                     <div>
                         <label class="block text-gray-300 mb-1">Data de Fim</label>
                         <input
@@ -331,7 +393,6 @@
                         />
                     </div>
 
-                    <!-- Due Date -->
                     <div>
                         <label class="block text-gray-300 mb-1">Prazo Máximo (Due Date)</label>
                         <input
@@ -342,7 +403,6 @@
                         />
                     </div>
 
-                    <!-- URL da Imagem -->
                     <div>
                         <label class="block text-gray-300 mb-1">URL da Imagem</label>
                         <input

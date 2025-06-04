@@ -10,6 +10,7 @@ public record CardUpdateRequest(
         String descriptionFull,
         @NotBlank
         String status,
+        String priority,
         LocalDate startDate,
         LocalDate endDate,
         LocalDate dueDate,

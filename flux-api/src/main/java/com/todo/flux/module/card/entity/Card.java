@@ -42,6 +42,10 @@ public class Card {
     @Column(nullable = false)
     private CardStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "default 'LOW'")
+    private CardPriority priority;
+
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalDate dueDate;
@@ -52,7 +56,6 @@ public class Card {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    // NOVO: campo “assigned user”
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id")
     private User assignee;
@@ -84,12 +87,11 @@ public class Card {
         this.setDescriptionBrief(dto.descriptionBrief());
         this.setDescriptionFull(dto.descriptionFull());
         this.setStatus(CardStatus.valueOf(dto.status()));
+        this.setPriority(CardPriority.valueOf(dto.priority()));
         this.setStartDate(dto.startDate());
         this.setEndDate(dto.endDate());
         this.setDueDate(dto.dueDate());
         this.setImageUrl(dto.imageUrl());
-        // se quiser permitir já atualizar o assignee via "update", poderia incluir:
-        // this.setAssignee(dto.assignee());  // se o DTO trouxer o objeto User
     }
 
     public void assignTo(User user) {
@@ -108,7 +110,8 @@ public class Card {
                 this.getDueDate(),
                 this.getImageUrl(),
                 this.getBoard().getId(),
-                this.getAssignee() != null ? this.getAssignee().getEmail() : null, // retorna e-mail do assignee
+                this.getPriority() != null ? this.getPriority().name() : null,
+                this.getAssignee() != null ? this.getAssignee().getEmail() : null,
                 this.getCreatedAt(),
                 this.getUpdatedAt()
         );

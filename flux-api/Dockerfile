@@ -31,6 +31,6 @@ EXPOSE 8080
 
 ENV JWT_PUBLIC_KEY_PATH=file:/app/keys/app.pub
 ENV JWT_PRIVATE_KEY_PATH=file:/app/keys/app.key
-ENV DEFAULT_ACCESS_ORIGIN=http://localhost
+ENV DEFAULT_ACCESS_ORIGIN=http:35.198.9.133:8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

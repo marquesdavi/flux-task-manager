@@ -319,6 +319,7 @@ class CardServiceImplTest {
                     "Updated brief desc",
                     "Updated full desc",
                     "DOING",
+                    "MEDIUM",
                     LocalDate.now().plusDays(1),
                     LocalDate.now().plusDays(2),
                     LocalDate.now().plusDays(5),

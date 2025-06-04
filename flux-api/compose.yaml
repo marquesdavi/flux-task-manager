@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: ./flux-api
-      dockerfile: DockerfileDeploy
+      context: ./
+      dockerfile: Dockerfile
     image: flux-all-in-one
     depends_on:
       postgres:
@@ -31,6 +31,9 @@ services:
       SPRING_DATASOURCE_URL:      jdbc:postgresql://postgres:5432/flux_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_PUBLIC_KEY_PATH:        file:/app/keys/app.pub
+      JWT_PRIVATE_KEY_PATH:       file:/app/keys/app.key
+      DEFAULT_ACCESS_ORIGIN:      http://localhost:8080
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s

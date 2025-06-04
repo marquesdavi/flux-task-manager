@@ -15,6 +15,7 @@ export interface CardUpdateRequest {
     descriptionFull?: string;
     status: 'TODO' | 'DOING' | 'DONE';
     startDate?: string;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | null;
     endDate?: string;
     dueDate?: string;
     imageUrl?: string;
@@ -30,6 +31,7 @@ export interface CardResponse {
     endDate: string;                // “yyyy-MM-dd”
     dueDate: string;                // “yyyy-MM-dd”
     imageUrl: string | null;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | null;
     assigneeEmail: string | null;
     boardId: string;                // UUID
     createdAt: string;                // date-time ISO
