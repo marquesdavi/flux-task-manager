@@ -52,18 +52,6 @@ public class SecurityConfig {
             "/actuator"
     };
 
-    private static final String[] STATIC_WHITE_LIST = {
-            "/",
-            "/index.html",
-            "/*.js",
-            "/*.css",
-            "/favicon.ico",
-            "/assets/**",
-            "/*.svg",
-            "/*.json",
-            "/static/**"
-    };
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
@@ -72,7 +60,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
                                 .requestMatchers(AUTH_WHITE_LIST).permitAll()
-                                .requestMatchers(HttpMethod.GET, STATIC_WHITE_LIST).permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
