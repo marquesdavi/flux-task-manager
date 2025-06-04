@@ -364,14 +364,24 @@
                         <label class="block text-gray-300 mb-1">Prioridade</label>
                         <select
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.priority"
                         >
-                            <option class="text-black" value="LOW">Baixa</option>
-                            <option class="text-black" value="MEDIUM">Média</option>
-                            <option class="text-black" value="HIGH">Alta</option>
+                            <option class="text-black" [value]="'LOW'"
+                                    [selected]="!modalData.priority || modalData.priority === 'LOW'">
+                                Baixa
+                            </option>
+                            <option class="text-black" [value]="'MEDIUM'"
+                                    [selected]="modalData.priority === 'MEDIUM'">
+                                Média
+                            </option>
+                            <option class="text-black" [value]="'HIGH'"
+                                    [selected]="modalData.priority === 'HIGH'">
+                                Alta
+                            </option>
                         </select>
                     </div>
+
 
                     <div>
                         <label class="block text-gray-300 mb-1">Data de Início</label>
@@ -413,10 +423,6 @@
                         />
                     </div>
 
-                    @if (modalError) {
-                        <p class="text-red-500">{{ modalError }}</p>
-                    }
-
                     <div class="mt-4">
                         <label class="block text-gray-300 mb-1">Responsável Atual</label>
                         <p class="text-[#e5e5e5] mb-2">
@@ -449,6 +455,10 @@
                             <p class="mt-1 text-sm text-red-500">{{ assignError }}</p>
                         }
                     </div>
+
+                    @if (modalError) {
+                        <p class="text-red-500">{{ modalError }}</p>
+                    }
 
                     <div class="mt-6 flex justify-end gap-3">
                         <button
