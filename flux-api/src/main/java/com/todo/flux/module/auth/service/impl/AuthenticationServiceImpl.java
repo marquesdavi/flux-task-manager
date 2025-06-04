@@ -1,10 +1,11 @@
 package com.todo.flux.module.auth.service.impl;
 
+import com.todo.flux.config.resilience.Resilient;
 import com.todo.flux.module.auth.dto.LoginRequest;
-import com.todo.flux.module.user.dto.RegisterRequest;
 import com.todo.flux.module.auth.dto.TokenResponse;
-import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.auth.service.AuthenticationService;
+import com.todo.flux.module.user.dto.RegisterRequest;
+import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class AuthenticationServiceImpl
     private static final String ISSUER = "flux-api";
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public TokenResponse authenticate(LoginRequest request) {
         log.info("Tentativa de login para o email: {}", request.email());
         User user = userService.findByEmail(request.email());
@@ -66,11 +68,11 @@ public class AuthenticationServiceImpl
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiresIn))
                 .claim("role", user.getRole().name())
-                .claim("scope", user.getRole().name())
                 .build();
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public User getAuthenticated(){
         Authentication currentSession = SecurityContextHolder.getContext().getAuthentication();
         Long userId = Long.parseLong(currentSession.getName());

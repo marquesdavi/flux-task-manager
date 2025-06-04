@@ -1,10 +1,11 @@
 package com.todo.flux.module.user.service.impl;
 
+import com.todo.flux.config.resilience.Resilient;
+import com.todo.flux.exception.AlreadyExistsException;
+import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.user.dto.RegisterRequest;
 import com.todo.flux.module.user.entity.RoleEnum;
 import com.todo.flux.module.user.entity.User;
-import com.todo.flux.exception.AlreadyExistsException;
-import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.user.repository.UserRepository;
 import com.todo.flux.module.user.service.UserService;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public void create(RegisterRequest dto) {
         log.info("Creating new user with email: {}", dto.email());
         existsByEmail(dto.email());
@@ -43,11 +45,13 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public List<User> list() {
         return userRepository.findAll();
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -62,21 +66,19 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public void update(Long id, RegisterRequest dto) {
         log.info("Updating user id={} with email: {}", id, dto.email());
         User existing = findByIdOrElseThrow(id);
 
-        // Se o e-mail foi alterado, verificar duplicidade
         if (!existing.getEmail().equals(dto.email())) {
             existsByEmail(dto.email());
             existing.setEmail(dto.email());
         }
 
-        // Atualizar nome
         existing.setFirstName(dto.firstName());
         existing.setLastName(dto.lastName());
 
-        // Atualizar senha (sempre re-hashear)
         String encodedPassword = passwordEncoder.encode(dto.password());
         existing.setPassword(encodedPassword);
 
@@ -85,6 +87,7 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public User getByID(Long id) {
         log.info("Fetching user by id={}", id);
         return findByIdOrElseThrow(id);
@@ -92,6 +95,7 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public void deleteAccount(Long id) {
         log.info("Deleting user id={}", id);
         User existing = findByIdOrElseThrow(id);

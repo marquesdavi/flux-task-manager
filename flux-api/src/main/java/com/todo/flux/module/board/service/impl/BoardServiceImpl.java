@@ -1,15 +1,16 @@
 package com.todo.flux.module.board.service.impl;
 
+import com.todo.flux.config.resilience.Resilient;
+import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.auth.dto.LoginRequest;
 import com.todo.flux.module.auth.dto.TokenResponse;
+import com.todo.flux.module.auth.service.AuthenticationService;
 import com.todo.flux.module.board.dto.BoardCreateRequest;
 import com.todo.flux.module.board.dto.BoardResponse;
 import com.todo.flux.module.board.dto.BoardUpdateRequest;
 import com.todo.flux.module.board.entity.Board;
 import com.todo.flux.module.board.repository.BoardRepository;
 import com.todo.flux.module.board.service.BoardService;
-import com.todo.flux.exception.NotFoundException;
-import com.todo.flux.module.auth.service.AuthenticationService;
 import com.todo.flux.module.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public BoardResponse create(BoardCreateRequest dto) {
         User currentUser = authService.getAuthenticated();
         log.info("Creating board '{}' for user id={}", dto.title(), currentUser.getId());
@@ -43,6 +45,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public List<BoardResponse> listAllForUser() {
         User currentUser = authService.getAuthenticated();
         log.info("Listing boards for user id={}", currentUser.getId());
@@ -53,6 +56,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public BoardResponse getById(UUID boardId) {
         User currentUser = authService.getAuthenticated();
         Board board = findById(boardId);
@@ -66,6 +70,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public BoardResponse update(UUID boardId, BoardUpdateRequest dto) {
         User currentUser = authService.getAuthenticated();
         Board board = findById(boardId);
@@ -82,6 +87,7 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public void delete(UUID boardId) {
         User currentUser = authService.getAuthenticated();
         Board board = findById(boardId);

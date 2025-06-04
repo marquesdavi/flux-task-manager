@@ -10,6 +10,7 @@ import com.todo.flux.module.card.dto.CardCreateRequest;
 import com.todo.flux.module.card.dto.CardResponse;
 import com.todo.flux.module.card.dto.CardUpdateRequest;
 import com.todo.flux.module.card.entity.Card;
+import com.todo.flux.module.card.entity.CardStatus;
 import com.todo.flux.module.card.repository.CardRepository;
 import com.todo.flux.module.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +90,7 @@ class CardServiceImplTest {
         cardOnCurrentUserBoard = Card.builder()
                 .id(cardOnCurrentUserBoardId)
                 .title("Card on Current User's Board")
-                .status("To Do")
+                .status(CardStatus.valueOf("TODO"))
                 .board(boardOwnedByCurrentUser)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -99,7 +100,7 @@ class CardServiceImplTest {
         cardOnOtherUserBoard = Card.builder()
                 .id(cardOnOtherUserBoardId)
                 .title("Card on Other User's Board")
-                .status("To Do")
+                .status(CardStatus.valueOf("TODO"))
                 .board(boardOwnedByOtherUser)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -120,7 +121,7 @@ class CardServiceImplTest {
                     "New Card Title",
                     "Brief desc",
                     "Full desc",
-                    "To Do",
+                    "TODO",
                     LocalDate.now(),
                     null,
                     LocalDate.now().plusDays(7),
@@ -204,7 +205,7 @@ class CardServiceImplTest {
             Card anotherCard = Card.builder()
                     .id(UUID.randomUUID())
                     .title("Another Card")
-                    .status("Doing")
+                    .status(CardStatus.valueOf("DOING"))
                     .board(boardOwnedByCurrentUser)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
@@ -317,7 +318,7 @@ class CardServiceImplTest {
                     "Updated Card Title",
                     "Updated brief desc",
                     "Updated full desc",
-                    "Doing",
+                    "DOING",
                     LocalDate.now().plusDays(1),
                     LocalDate.now().plusDays(2),
                     LocalDate.now().plusDays(5),

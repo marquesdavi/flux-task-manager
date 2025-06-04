@@ -1,6 +1,7 @@
 // src/main/java/com/todo/flux/module/card/service/impl/CardServiceImpl.java
 package com.todo.flux.module.card.service.impl;
 
+import com.todo.flux.config.resilience.Resilient;
 import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.auth.dto.LoginRequest;
 import com.todo.flux.module.auth.dto.TokenResponse;
@@ -33,6 +34,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public CardResponse create(UUID boardId, CardCreateRequest dto) {
         User currentUser = authService.getAuthenticated();
         Board board = boardService.findById(boardId);
@@ -48,6 +50,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public List<CardResponse> listByBoard(UUID boardId) {
         User currentUser = authService.getAuthenticated();
         Board board = boardService.findById(boardId);
@@ -63,6 +66,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public CardResponse getById(UUID cardId) {
         User currentUser = authService.getAuthenticated();
         Card card = findById(cardId);
@@ -76,6 +80,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public CardResponse update(UUID cardId, CardUpdateRequest dto) {
         User currentUser = authService.getAuthenticated();
         Card card = findById(cardId);
@@ -92,6 +97,7 @@ public class CardServiceImpl implements CardService {
 
     @Override
     @Transactional
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public void delete(UUID cardId) {
         User currentUser = authService.getAuthenticated();
         Card card = findById(cardId);

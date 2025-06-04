@@ -34,8 +34,9 @@ public class Card {
     @Column(columnDefinition = "TEXT")
     private String descriptionFull;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private CardStatus status;
 
     private LocalDate startDate;
     private LocalDate endDate;
@@ -54,13 +55,12 @@ public class Card {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
     public static Card fromRequest(CardCreateRequest dto, Board board) {
         return Card.builder()
                 .title(dto.title())
                 .descriptionBrief(dto.descriptionBrief())
                 .descriptionFull(dto.descriptionFull())
-                .status(dto.status())
+                .status(CardStatus.valueOf(dto.status()))
                 .startDate(dto.startDate())
                 .endDate(dto.endDate())
                 .dueDate(dto.dueDate())
@@ -73,7 +73,7 @@ public class Card {
         this.setTitle(dto.title());
         this.setDescriptionBrief(dto.descriptionBrief());
         this.setDescriptionFull(dto.descriptionFull());
-        this.setStatus(dto.status());
+        this.setStatus(CardStatus.valueOf(dto.status()));
         this.setStartDate(dto.startDate());
         this.setEndDate(dto.endDate());
         this.setDueDate(dto.dueDate());
@@ -86,7 +86,7 @@ public class Card {
                 this.getTitle(),
                 this.getDescriptionBrief(),
                 this.getDescriptionFull(),
-                this.getStatus(),
+                this.getStatus().name(),   // envia “TODO”, “DOING” ou “DONE”
                 this.getStartDate(),
                 this.getEndDate(),
                 this.getDueDate(),
