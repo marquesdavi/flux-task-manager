@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { BoardPageComponent } from './features/board/board-page/board-page.component';
-import { AppLayoutComponent } from './shared/layout/app-layout.component/app-layout.component';
+import { KanbanPageComponent } from './features/board/kanban-page/kanban-page.component';
+import { AppLayoutComponent } from './shared/layout/app-layout/app-layout.component';
 import { BoardManagementPageComponent } from './features/board/board-management-page/board-management-page.component';
 import { ProfilePageComponent } from './features/user/profile-page/profile-page.component';
 import { LoginPageComponent } from './features/user/login-page/login-page.component';
@@ -27,7 +27,7 @@ export const routes: Routes = [
             { path: 'board', component: BoardManagementPageComponent, canActivate: [AuthGuard] },
             {
                 path: 'boards/:id',
-                component: BoardPageComponent,
+                component: KanbanPageComponent,
                 canActivate: [AuthGuard]
             },
             { path: 'settings', component: ProfilePageComponent, canActivate: [AuthGuard] }

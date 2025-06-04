@@ -5,6 +5,7 @@ import {UserService} from '../../../core/service/user.service';
 import {AuthenticationService} from '../../../core/service/auth.service';
 import {Subscription} from 'rxjs';
 import {RegisterRequest, User} from '../../../core/models/user';
+import {DialogService} from '../../../core/service/dialog.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -25,6 +26,7 @@ export class ProfilePageComponent implements OnDestroy {
   private userService = inject(UserService);
   private authService = inject(AuthenticationService);
   private router = inject(Router);
+  private dialogService = inject(DialogService);
 
   private fetchSub?: Subscription;
   private saveSub?: Subscription;
@@ -99,7 +101,7 @@ export class ProfilePageComponent implements OnDestroy {
     this.saveSub = this.userService.updateCurrent(payload).subscribe({
       next: () => {
         this.loadingSignal.set(false);
-        alert('Dados atualizados com sucesso.');
+          this.dialogService.alert('Dados atualizados com sucesso.');
       },
       error: () => {
         this.errorSignal.set('Não foi possível salvar suas alterações.');
@@ -108,8 +110,8 @@ export class ProfilePageComponent implements OnDestroy {
     });
   }
 
-  deleteAccount(): void {
-    if (!confirm('Tem certeza de que deseja deletar sua conta? Esta ação não pode ser desfeita.')) {
+  async deleteAccount(): Promise<void> {
+    if (!await this.dialogService.confirm('Tem certeza de que deseja deletar sua conta? Esta ação não pode ser desfeita.')) {
       return;
     }
 

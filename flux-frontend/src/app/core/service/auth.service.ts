@@ -5,6 +5,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { Observable, tap } from 'rxjs';
 import {environment} from '../../environments/environment';
 import {TokenResponse} from '../models/auth';
+import {DialogService} from './dialog.service';
 
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +13,8 @@ export class AuthenticationService {
     constructor(
         private http: HttpClient,
         private cookieService: CookieService,
-        private router: Router
+        private router: Router,
+        private dialog: DialogService
     ) {}
 
     login(email: string, password: string): Observable<TokenResponse> {
@@ -25,10 +27,10 @@ export class AuthenticationService {
             );
     }
 
-    logout(): void {
-        if (confirm('Ao sair, seus dados serão perdidos. Continuar?')) {
+    async logout(): Promise<void> {
+        if (await this.dialog.confirm('Ao sair, seus dados serão perdidos. Continuar?')) {
             this.cookieService.delete('accessToken', '/');
-            this.router.navigate(['/login']);
+            await this.router.navigate(['/login']);
         }
     }
 

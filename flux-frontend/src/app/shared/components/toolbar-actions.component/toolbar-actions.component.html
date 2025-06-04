@@ -1,9 +1,0 @@
-@for (a of actions; track a.label) {
-  <app-primary-button
-    [label]="a.label"
-    [colorClass]="a.color"
-    (action)="actionClick.emit(a.label)"
-  ></app-primary-button>
-} @empty {
-  <span class="text-[#93b0c8] text-sm">Sem ações</span>
-}

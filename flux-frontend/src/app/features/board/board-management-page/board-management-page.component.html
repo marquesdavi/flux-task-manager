@@ -38,7 +38,7 @@
           class="bg-[#1989e5] hover:bg-[#1567a8] text-white font-semibold px-4 py-2 rounded flex items-center"
         >
           <app-material-symbol size="18px">add</app-material-symbol>
-          <span class="ml-2">Create new board</span>
+          <span class="ml-2">Criar novo Quadro</span>
         </button>
       }
     </div>
@@ -94,14 +94,14 @@
               >
                 <button
                   (click)="startEditing(board); $event.stopPropagation()"
-                  class="bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] p-1 rounded"
+                  class="flex items-center p-1.5 bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] rounded-full"
                   title="Rename"
                 >
                   <app-material-symbol size="18px">edit</app-material-symbol>
                 </button>
                 <button
                   (click)="deleteBoard(board.id); $event.stopPropagation()"
-                  class="bg-[#5c1515] hover:bg-[#7d1f1f] text-white p-1 rounded"
+                  class="flex items-center p-1.5 bg-[#5c1515] hover:bg-[#7d1f1f] text-white rounded-full"
                   title="Delete"
                 >
                   <app-material-symbol size="18px">delete</app-material-symbol>

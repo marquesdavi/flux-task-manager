@@ -1,0 +1,31 @@
+<div
+    class="relative bg-[#1f2933] rounded-lg shadow p-4 hover:shadow-lg transition"
+    (click)="onCardClick()"
+>
+    <div class="absolute top-2 right-2 flex space-x-1">
+        <button
+            (click)="onEditClick(); $event.stopPropagation()"
+            class="flex items-center bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] p-1.5 rounded-full"
+            aria-label="Edit card"
+        >
+            <app-material-symbol size="14px">edit</app-material-symbol>
+        </button>
+
+        <button
+            (click)="onDeleteClick(); $event.stopPropagation()"
+            class="flex items-center p-1.5 bg-[#5c1515] hover:bg-[#7d1f1f] text-white  rounded-full"
+            aria-label="Delete card"
+        >
+            <app-material-symbol size="14px">delete</app-material-symbol>
+        </button>
+    </div>
+
+    @if (imageUrl) {
+        <div class="mb-2">
+            <img [ngSrc]="imageUrl" alt="Card image" class="w-full h-24 object-cover rounded" fill/>
+        </div>
+    }
+
+    <h3 class="text-white font-semibold mb-1">{{ title }}</h3>
+    <p class="text-gray-300 text-sm">{{ description }}</p>
+</div>

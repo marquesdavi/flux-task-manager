@@ -1,0 +1,42 @@
+@if (dialogService.dialogRequest$()) {
+    <div
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+        <div
+            class="bg-[#1f2933] text-white rounded-lg w-[90%] max-w-sm p-6 shadow-lg"
+        >
+            <p class="mb-4">
+                {{ dialogService.dialogRequest$()!.message }}
+            </p>
+
+            @switch(dialogService.dialogRequest$()!.type) {
+                @case('alert') {
+                    <div class="flex justify-end">
+                        <button
+                            class="bg-[#007bff] hover:bg-[#005bb5] text-white font-medium px-4 py-2 rounded"
+                            (click)="onOk()"
+                        >
+                            OK
+                        </button>
+                    </div>
+                }
+                @case('confirm') {
+                    <div class="flex justify-end gap-2">
+                        <button
+                            class="bg-gray-600 hover:bg-gray-500 text-white font-medium px-4 py-2 rounded"
+                            (click)="onCancel()"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            class="bg-[#007bff] hover:bg-[#005bb5] text-white font-medium px-4 py-2 rounded"
+                            (click)="onConfirm()"
+                        >
+                            Confirmar
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
