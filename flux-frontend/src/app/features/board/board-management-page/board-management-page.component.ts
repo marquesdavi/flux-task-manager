@@ -1,17 +1,17 @@
-import {Component, inject, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {Router, RouterModule} from '@angular/router';
-import {BoardService} from '../../../core/service/board.service';
-import {Board} from '../../../core/models/board';
-import {FormsModule} from '@angular/forms';
-import {MaterialSymbolComponent} from '../../../shared/components/material-symbol/material-symbol.component';
-import {DialogService} from '../../../core/service/dialog.service';
+// src/app/pages/board-management-page/board-management-page.component.ts
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { BoardService } from '../../../core/service/board.service';
+import { Board } from '../../../core/models/board';
+import { FormsModule } from '@angular/forms';
+import { MaterialSymbolComponent } from '../../../shared/components/material-symbol/material-symbol.component';
+import { DialogService } from '../../../core/service/dialog.service';
+import { UserService } from '../../../core/service/user.service';
 
 @Component({
     selector: 'app-boards-page',
     standalone: true,
     imports: [
-        CommonModule,
         RouterModule,
         FormsModule,
         MaterialSymbolComponent
@@ -20,22 +20,42 @@ import {DialogService} from '../../../core/service/dialog.service';
     styleUrls: ['./board-management-page.component.css']
 })
 export class BoardManagementPageComponent {
-    private boardService = inject(BoardService);
-    private router = inject(Router);
-    private dialogService: DialogService = inject(DialogService);
+    private boardService    = inject(BoardService);
+    private router          = inject(Router);
+    private dialogService   = inject(DialogService);
+    private userService     = inject(UserService);
 
-    boardsSignal = signal<Board[]>([]);
-    loadingSignal = signal(true);
+    boardsSignal         = signal<Board[]>([]);
+    loadingSignal        = signal(true);
 
-    showNewInputSignal = signal(false);
-    newBoardTitleSignal = signal('');
-    newBoardErrorSignal = signal('');
+    showNewInputSignal   = signal(false);
+    newBoardTitleSignal  = signal('');
+    newBoardErrorSignal  = signal('');
 
-    editingIdSignal = signal<string | null>(null);
-    editTitleSignal = signal('');
-    editErrorSignal = signal('');
+    editingIdSignal      = signal<string | null>(null);
+    editTitleSignal      = signal('');
+    editErrorSignal      = signal('');
+
+    showAccessModal      = signal(false);
+    currentBoard         = signal<Board | null>(null);
+    newCollaboratorEmail = signal('');
+    accessError          = signal('');
+
+    currentUserIdSignal  = signal<number | null>(null);
+
+    currentUserEmail = signal<string | null>(null);
 
     constructor() {
+        this.userService.getCurrent().subscribe({
+            next: user => {
+                this.currentUserIdSignal.set(user.id);
+                this.currentUserEmail.set(user.email);
+            },
+            error: () => {
+                this.currentUserIdSignal.set(null);
+            }
+        });
+
         this.loadBoards();
     }
 
@@ -184,5 +204,67 @@ export class BoardManagementPageComponent {
 
     goToBoard(board: Board): void {
         this.router.navigate(['/boards', board.id]);
+    }
+
+    openAccessModal(board: Board): void {
+        this.accessError.set('');
+        this.newCollaboratorEmail.set('');
+        this.boardService.getById(board.id).subscribe({
+            next: (fullBoard: Board) => {
+                this.currentBoard.set(fullBoard);
+                this.showAccessModal.set(true);
+            },
+            error: () => {
+                this.dialogService.alert('Não foi possível carregar dados da board.');
+            }
+        });
+    }
+
+    closeAccessModal(): void {
+        this.showAccessModal.set(false);
+        this.currentBoard.set(null);
+        this.newCollaboratorEmail.set('');
+        this.accessError.set('');
+    }
+
+    onAddCollaborator(): void {
+        this.accessError.set('');
+        const email = this.newCollaboratorEmail().trim();
+        if (!email) {
+            this.accessError.set('E-mail não pode ficar em branco.');
+            return;
+        }
+        const board = this.currentBoard();
+        if (!board) {
+            return;
+        }
+        this.boardService.addCollaborator(board.id, email).subscribe({
+            next: (updatedBoard: Board) => {
+                this.currentBoard.set(updatedBoard);
+                this.newCollaboratorEmail.set('');
+            },
+            error: (err) => {
+                this.accessError.set(err.error?.message || 'Falha ao convidar usuário.');
+            }
+        });
+    }
+
+    onRemoveCollaborator(email: string): void {
+        const board = this.currentBoard();
+        if (!board) {
+            return;
+        }
+        this.boardService.removeCollaborator(board.id, email).subscribe({
+            next: (updatedBoard: Board) => {
+                this.currentBoard.set(updatedBoard);
+            },
+            error: (err) => {
+                this.accessError.set(err.error?.message || 'Falha ao remover colaborador.');
+            }
+        });
+    }
+
+    trackById(index: number, item: Board) {
+        return item.id;
     }
 }

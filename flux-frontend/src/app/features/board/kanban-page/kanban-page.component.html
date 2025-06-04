@@ -248,6 +248,7 @@
     </div>
 </div>
 
+
 @if (showModal) {
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div
@@ -261,41 +262,45 @@
 
             @if (modalData) {
                 <div class="flex flex-col gap-4">
+                    <!-- Título -->
                     <div>
                         <label class="block text-gray-300 mb-1">Título</label>
                         <input
                             type="text"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.title"
                         />
                     </div>
 
+                    <!-- Descrição Breve -->
                     <div>
                         <label class="block text-gray-300 mb-1">Descrição Breve</label>
                         <textarea
                             rows="2"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.descriptionBrief"
                         ></textarea>
                     </div>
 
+                    <!-- Descrição Completa -->
                     <div>
                         <label class="block text-gray-300 mb-1">Descrição Completa</label>
                         <textarea
                             rows="4"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.descriptionFull"
                         ></textarea>
                     </div>
 
+                    <!-- Status -->
                     <div>
                         <label class="block text-gray-300 mb-1">Status</label>
                         <select
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.status"
                         >
                             <option class="text-black" value="TODO">A fazer</option>
@@ -304,42 +309,46 @@
                         </select>
                     </div>
 
+                    <!-- Data de Início -->
                     <div>
                         <label class="block text-gray-300 mb-1">Data de Início</label>
                         <input
                             type="date"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.startDate"
                         />
                     </div>
 
+                    <!-- Data de Fim -->
                     <div>
                         <label class="block text-gray-300 mb-1">Data de Fim</label>
                         <input
                             type="date"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.endDate"
                         />
                     </div>
 
+                    <!-- Due Date -->
                     <div>
                         <label class="block text-gray-300 mb-1">Prazo Máximo (Due Date)</label>
                         <input
                             type="date"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.dueDate"
                         />
                     </div>
 
+                    <!-- URL da Imagem -->
                     <div>
                         <label class="block text-gray-300 mb-1">URL da Imagem</label>
                         <input
                             type="text"
                             class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2
-                                   text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                     text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
                             [(ngModel)]="modalData.imageUrl"
                         />
                     </div>
@@ -348,17 +357,50 @@
                         <p class="text-red-500">{{ modalError }}</p>
                     }
 
-                    <div class="mt-4 flex justify-end gap-3">
+                    <div class="mt-4">
+                        <label class="block text-gray-300 mb-1">Responsável Atual</label>
+                        <p class="text-[#e5e5e5] mb-2">
+                            {{ modalData.assigneeEmail || 'Nenhum' }}
+                        </p>
+
+                        <label class="block text-gray-300 mb-1">Trocar Responsável</label>
+                        <select
+                            class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                            [(ngModel)]="assigneeEmailForAssign"
+                        >
+                            <option class="text-black" value="">-- Nenhum --</option>
+                            @for (user of collaborators; track user.id) {
+                                <option class="text-black" [value]="user.email">
+                                    {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+                                </option>
+                            }
+                        </select>
+
+                        <div class="flex justify-end gap-2 mt-2">
+                            <button
+                                (click)="assignUser()"
+                                class="bg-[#007bff] text-white px-4 py-2 rounded hover:bg-[#005bb5] transition-colors"
+                            >
+                                Atribuir
+                            </button>
+                        </div>
+
+                        @if (assignError) {
+                            <p class="mt-1 text-sm text-red-500">{{ assignError }}</p>
+                        }
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-3">
                         <button
                             class="bg-[#374151] text-[#93b0c8] px-4 py-2 rounded hover:bg-[#4b5563]
-                                   transition-colors"
+                     transition-colors"
                             (click)="closeModal()"
                         >
                             Cancel
                         </button>
                         <button
                             class="bg-[#007bff] text-white px-4 py-2 rounded hover:bg-[#005bb5]
-                                   transition-colors"
+                     transition-colors"
                             (click)="saveModal()"
                         >
                             Save

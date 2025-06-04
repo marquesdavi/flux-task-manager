@@ -12,3 +12,10 @@ export interface User {
   email:     string;
   role:      'ADMIN' | 'USER';
 }
+
+export interface UserSummary {
+    id:        number;
+    firstName: string;
+    lastName:  string;
+    email:     string;
+}

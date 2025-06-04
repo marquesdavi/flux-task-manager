@@ -65,7 +65,7 @@ class BoardServiceImplTest {
     }
 
     private BoardResponse createTestBoardResponse(UUID id, String title, Long ownerId) {
-        return new BoardResponse(id, title, ownerId, null, null);
+        return new BoardResponse(id, title, ownerId,null, null, null);
     }
 
 

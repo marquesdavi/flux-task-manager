@@ -1,5 +1,6 @@
 package com.todo.flux.module.card.controller;
 
+import com.todo.flux.module.card.dto.CardAssignRequest;
 import com.todo.flux.module.card.dto.CardCreateRequest;
 import com.todo.flux.module.card.dto.CardResponse;
 import com.todo.flux.module.card.dto.CardUpdateRequest;
@@ -91,5 +92,13 @@ public class CardController {
             @PathVariable UUID cardId) {
         cardService.delete(cardId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Assign a card to an user")
+    @PatchMapping("/cards/{cardId}/assign")
+    public ResponseEntity<CardResponse> assign(
+            @PathVariable UUID cardId,
+            @Valid @RequestBody CardAssignRequest dto) {
+        return ResponseEntity.ok(cardService.assignCard(cardId, dto));
     }
 }

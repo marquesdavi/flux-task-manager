@@ -15,7 +15,7 @@ public record CardResponse(
         LocalDate dueDate,
         String imageUrl,
         UUID boardId,
+        String assigneeEmail,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
-}
+) {}

@@ -4,6 +4,7 @@ import com.todo.flux.config.resilience.Resilient;
 import com.todo.flux.exception.AlreadyExistsException;
 import com.todo.flux.exception.NotFoundException;
 import com.todo.flux.module.user.dto.RegisterRequest;
+import com.todo.flux.module.user.dto.UserSummary;
 import com.todo.flux.module.user.entity.RoleEnum;
 import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.repository.UserRepository;
@@ -15,11 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService<User, RegisterRequest> {
+public class UserServiceImpl implements UserService<User, RegisterRequest, UserSummary> {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder; // injetar via @Bean no SecurityConfig, por exemplo
 
@@ -48,6 +50,12 @@ public class UserServiceImpl implements UserService<User, RegisterRequest> {
     @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
     public List<User> list() {
         return userRepository.findAll();
+    }
+
+    @Override
+    @Resilient(rateLimiter = "RateLimiter", circuitBreaker = "CircuitBreaker")
+    public List<UserSummary> listByBoardId(UUID boardId) {
+        return userRepository.findDistinctByBoardId(boardId);
     }
 
     @Override

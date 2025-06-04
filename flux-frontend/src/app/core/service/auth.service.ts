@@ -28,7 +28,7 @@ export class AuthenticationService {
     }
 
     async logout(): Promise<void> {
-        if (await this.dialog.confirm('Ao sair, seus dados serão perdidos. Continuar?')) {
+        if (await this.dialog.confirm('Deseja sair e voltar para a tela de login?')) {
             this.cookieService.delete('accessToken', '/');
             await this.router.navigate(['/login']);
         }

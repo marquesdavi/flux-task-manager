@@ -4,8 +4,12 @@ import com.todo.flux.module.board.entity.Board;
 import com.todo.flux.module.card.dto.CardCreateRequest;
 import com.todo.flux.module.card.dto.CardResponse;
 import com.todo.flux.module.card.dto.CardUpdateRequest;
+import com.todo.flux.module.user.entity.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -48,6 +52,11 @@ public class Card {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+    // NOVO: campo “assigned user”
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,6 +64,7 @@ public class Card {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
     public static Card fromRequest(CardCreateRequest dto, Board board) {
         return Card.builder()
                 .title(dto.title())
@@ -78,6 +88,12 @@ public class Card {
         this.setEndDate(dto.endDate());
         this.setDueDate(dto.dueDate());
         this.setImageUrl(dto.imageUrl());
+        // se quiser permitir já atualizar o assignee via "update", poderia incluir:
+        // this.setAssignee(dto.assignee());  // se o DTO trouxer o objeto User
+    }
+
+    public void assignTo(User user) {
+        this.assignee = user;
     }
 
     public CardResponse toResponse() {
@@ -86,12 +102,13 @@ public class Card {
                 this.getTitle(),
                 this.getDescriptionBrief(),
                 this.getDescriptionFull(),
-                this.getStatus().name(),   // envia “TODO”, “DOING” ou “DONE”
+                this.getStatus().name(),
                 this.getStartDate(),
                 this.getEndDate(),
                 this.getDueDate(),
                 this.getImageUrl(),
                 this.getBoard().getId(),
+                this.getAssignee() != null ? this.getAssignee().getEmail() : null, // retorna e-mail do assignee
                 this.getCreatedAt(),
                 this.getUpdatedAt()
         );

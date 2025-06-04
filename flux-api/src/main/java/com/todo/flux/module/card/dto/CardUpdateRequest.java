@@ -9,7 +9,7 @@ public record CardUpdateRequest(
         String descriptionBrief,
         String descriptionFull,
         @NotBlank
-        String status,      // “To Do” | “Doing” | “Done”
+        String status,
         LocalDate startDate,
         LocalDate endDate,
         LocalDate dueDate,

@@ -1,9 +1,10 @@
 package com.todo.flux.module.user.controller;
 
+import com.todo.flux.module.auth.service.AuthenticationService;
 import com.todo.flux.module.user.dto.RegisterRequest;
+import com.todo.flux.module.user.dto.UserSummary;
 import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.service.UserService;
-import com.todo.flux.module.auth.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,13 +17,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 @Tag(name = "User", description = "User management")
 public class UserController {
-    private final UserService<User, RegisterRequest> service;
+    private final UserService<User, RegisterRequest, UserSummary> service;
     private final AuthenticationService<User, ?, ?> authService;
 
     @Operation(summary = "Create a new user")
@@ -82,6 +84,17 @@ public class UserController {
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<User>> list() {
         List<User> users = service.list();
+        return ResponseEntity.ok(users);
+    }
+
+    @Operation(summary = "Get users(collaborators) by board id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+    })
+    @GetMapping("/board/{id}")
+    public ResponseEntity<List<UserSummary>> listByBoard(@PathVariable("id") UUID id) {
+        List<UserSummary> users = service.listByBoardId(id);
         return ResponseEntity.ok(users);
     }
 }

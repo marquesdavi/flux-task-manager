@@ -3,6 +3,7 @@ package com.todo.flux.module.board.controller;
 import com.todo.flux.module.board.dto.BoardCreateRequest;
 import com.todo.flux.module.board.dto.BoardResponse;
 import com.todo.flux.module.board.dto.BoardUpdateRequest;
+import com.todo.flux.module.board.dto.CollaboratorRequest;
 import com.todo.flux.module.board.service.BoardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -87,5 +88,47 @@ public class BoardController {
             @PathVariable UUID boardId) {
         boardService.delete(boardId);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Adicionar colaborador (por e-mail) a uma board")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Colaborador adicionado"),
+            @ApiResponse(responseCode = "404", description = "Board ou User não encontrado"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PostMapping("/{boardId}/collaborators")
+    public ResponseEntity<BoardResponse> addCollaborator(
+            @PathVariable UUID boardId,
+            @Valid @RequestBody CollaboratorRequest dto) {
+        BoardResponse response = boardService.addCollaborator(boardId, dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Remover colaborador (por e-mail) de uma board")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Colaborador removido"),
+            @ApiResponse(responseCode = "404", description = "Board ou User não encontrado"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @DeleteMapping("/{boardId}/collaborators")
+    public ResponseEntity<BoardResponse> removeCollaborator(
+            @PathVariable UUID boardId,
+            @Valid @RequestBody CollaboratorRequest dto) {
+        BoardResponse response = boardService.removeCollaborator(boardId, dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Listar e-mails dos colaboradores de uma board")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Colaboradores encontrados"),
+            @ApiResponse(responseCode = "404", description = "Board não encontrada ou sem acesso"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/{boardId}/collaborators")
+    public ResponseEntity<List<String>> listCollaborators(
+            @PathVariable UUID boardId
+    ) {
+        BoardResponse board = boardService.getById(boardId);
+        return ResponseEntity.ok(board.collaboratorsEmails());
     }
 }

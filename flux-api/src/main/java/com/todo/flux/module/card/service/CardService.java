@@ -1,6 +1,6 @@
-// src/main/java/com/todo/flux/module/card/service/CardService.java
 package com.todo.flux.module.card.service;
 
+import com.todo.flux.module.card.dto.CardAssignRequest;
 import com.todo.flux.module.card.dto.CardCreateRequest;
 import com.todo.flux.module.card.dto.CardResponse;
 import com.todo.flux.module.card.dto.CardUpdateRequest;
@@ -21,4 +21,5 @@ public interface CardService extends CrudService<
     List<CardResponse> listByBoard(UUID boardId);
 
     CardResponse create(UUID boardId, CardCreateRequest dto);
+    CardResponse assignCard(UUID cardId, CardAssignRequest dto);
 }

@@ -3,6 +3,7 @@ package com.todo.flux.module.auth.service.impl;
 import com.todo.flux.module.auth.dto.LoginRequest;
 import com.todo.flux.module.auth.dto.TokenResponse;
 import com.todo.flux.module.user.dto.RegisterRequest;
+import com.todo.flux.module.user.dto.UserSummary;
 import com.todo.flux.module.user.entity.RoleEnum;
 import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.service.UserService;
@@ -39,7 +40,7 @@ class AuthenticationServiceImplTest {
     private JwtEncoder jwtEncoder;
 
     @Mock
-    private UserService<User, RegisterRequest> userService;
+    private UserService<User, RegisterRequest, UserSummary> userService;
 
     @Mock
     private Jwt mockJwt;

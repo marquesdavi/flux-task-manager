@@ -1,118 +1,178 @@
+<!-- src/app/pages/board-management-page/board-management-page.component.html -->
 <div class="bg-[#111a22] min-h-screen text-white font-sans">
-  <div class="max-w-7xl mx-auto px-6 py-10">
-    <h1 class="text-3xl font-bold mb-6">Seus Boards</h1>
+    <div class="max-w-7xl mx-auto px-6 py-10">
+        <h1 class="text-3xl font-bold mb-6">Seus Boards</h1>
 
-    <div class="mb-8">
-      @if (showNewInputSignal()) {
-        <div class="flex flex-col md:flex-row gap-2 items-start md:items-center">
-          <input
-            id="newBoardInput"
-            type="text"
-            [value]="newBoardTitleSignal()"
-            (input)="newBoardTitleSignal.set($any($event.target).value)"
-            (keydown)="onNewBoardKeyDown($event)"
-            placeholder="Digite o nome do novo board…"
-            class="flex-1 bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
-                   text-white placeholder-[#93b0c8]
-                   focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-          />
-          <button
-            (click)="createBoard()"
-            class="bg-[#007bff] hover:bg-[#005bb5] text-white font-semibold px-4 py-2 rounded"
-          >
-            Create
-          </button>
-          <button
-            (click)="cancelNewBoard()"
-            class="ml-2 text-[#93b0c8] hover:text-white px-2 py-1"
-          >
-            Cancel
-          </button>
-        </div>
-        @if (newBoardErrorSignal()) {
-          <p class="text-red-500 text-sm mt-1">{{ newBoardErrorSignal() }}</p>
-        }
-      } @else {
-        <button
-          (click)="openNewBoardInput()"
-          class="bg-[#1989e5] hover:bg-[#1567a8] text-white font-semibold px-4 py-2 rounded flex items-center"
-        >
-          <app-material-symbol size="18px">add</app-material-symbol>
-          <span class="ml-2">Criar novo Quadro</span>
-        </button>
-      }
-    </div>
-
-    @if (loadingSignal()) {
-      <p class="text-[#93b0c8]">Carregando boards…</p>
-    } @else {
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        @for (board of boardsSignal(); track board.id) {
-          <div
-            class="bg-[#161f29] rounded-lg shadow-md hover:shadow-lg transition-shadow relative group"
-          >
-            @if (editingIdSignal() === board.id) {
-              <div class="p-4 flex flex-col gap-2">
-                <input
-                  id="editBoardInput-{{ board.id }}"
-                  type="text"
-                  [value]="editTitleSignal()"
-                  (input)="editTitleSignal.set($any($event.target).value)"
-                  (keydown)="onEditKeyDown($event, board)"
-                  class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2
-                         text-white placeholder-[#93b0c8]
-                         focus:outline-none focus:ring-2 focus:ring-[#007bff]"
-                />
-                <div class="flex gap-2">
-                  <button
-                    (click)="saveEdit(board)"
-                    class="bg-[#007bff] hover:bg-[#005bb5] text-white px-3 py-1 rounded"
-                  >
-                    Save
-                  </button>
-                  <button
-                    (click)="cancelEditing()"
-                    class="text-[#93b0c8] hover:text-white px-2 py-1"
-                  >
-                    Cancel
-                  </button>
+        <div class="mb-8">
+            @if (showNewInputSignal()) {
+                <div class="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                    <input
+                        id="newBoardInput"
+                        type="text"
+                        [value]="newBoardTitleSignal()"
+                        (input)="newBoardTitleSignal.set($any($event.target).value)"
+                        (keydown)="onNewBoardKeyDown($event)"
+                        placeholder="Digite o nome do novo board…"
+                        class="flex-1 bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2 text-white placeholder-[#93b0c8] focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                    />
+                    <button
+                        (click)="createBoard()"
+                        class="bg-[#007bff] hover:bg-[#005bb5] text-white font-semibold px-4 py-2 rounded"
+                    >
+                        Create
+                    </button>
+                    <button
+                        (click)="cancelNewBoard()"
+                        class="ml-2 text-[#93b0c8] hover:text-white px-2 py-1"
+                    >
+                        Cancel
+                    </button>
                 </div>
-                @if (editErrorSignal()) {
-                  <p class="text-red-500 text-sm mt-1">{{ editErrorSignal() }}</p>
+                @if (newBoardErrorSignal()) {
+                    <p class="text-red-500 text-sm mt-1">{{ newBoardErrorSignal() }}</p>
                 }
-              </div>
             } @else {
-              <div
-                (click)="goToBoard(board)"
-                class="px-4 py-6 cursor-pointer"
-              >
-                <h2 class="text-xl font-semibold">{{ board.title }}</h2>
-              </div>
-
-              <div
-                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2"
-              >
                 <button
-                  (click)="startEditing(board); $event.stopPropagation()"
-                  class="flex items-center p-1.5 bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] rounded-full"
-                  title="Rename"
+                    (click)="openNewBoardInput()"
+                    class="bg-[#1989e5] hover:bg-[#1567a8] text-white font-semibold px-4 py-2 rounded flex items-center"
                 >
-                  <app-material-symbol size="18px">edit</app-material-symbol>
+                    <app-material-symbol size="18px">add</app-material-symbol>
+                    <span class="ml-2">Criar novo Quadro</span>
                 </button>
-                <button
-                  (click)="deleteBoard(board.id); $event.stopPropagation()"
-                  class="flex items-center p-1.5 bg-[#5c1515] hover:bg-[#7d1f1f] text-white rounded-full"
-                  title="Delete"
-                >
-                  <app-material-symbol size="18px">delete</app-material-symbol>
-                </button>
-              </div>
             }
-          </div>
-        } @empty {
-          <p class="text-[#93b0c8] col-span-full">Você ainda não tem nenhum board.</p>
+        </div>
+
+        @if (loadingSignal()) {
+            <p class="text-[#93b0c8]">Carregando boards…</p>
+        } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @for (board of boardsSignal(); track board.id) {
+                    <div class="bg-[#161f29] rounded-lg shadow-md hover:shadow-lg transition-shadow relative group">
+                        @if (editingIdSignal() === board.id) {
+                            <div class="p-4 flex flex-col gap-2">
+                                <input
+                                    id="editBoardInput-{{ board.id }}"
+                                    type="text"
+                                    [value]="editTitleSignal()"
+                                    (input)="editTitleSignal.set($any($event.target).value)"
+                                    (keydown)="onEditKeyDown($event, board)"
+                                    class="w-full bg-[#1f2933] border border-[#2e3a47] rounded px-3 py-2 text-white placeholder-[#93b0c8] focus:outline-none focus:ring-2 focus:ring-[#007bff]"
+                                />
+                                <div class="flex gap-2">
+                                    <button
+                                        (click)="saveEdit(board)"
+                                        class="bg-[#007bff] hover:bg-[#005bb5] text-white px-3 py-1 rounded"
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        (click)="cancelEditing()"
+                                        class="text-[#93b0c8] hover:text-white px-2 py-1"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                                @if (editErrorSignal()) {
+                                    <p class="text-red-500 text-sm mt-1">{{ editErrorSignal() }}</p>
+                                }
+                            </div>
+                        } @else {
+                            <div class="px-4 py-6 cursor-pointer" (click)="goToBoard(board)">
+                                <h2 class="text-xl font-semibold">{{ board.title }}</h2>
+                            </div>
+
+                            @if (board.ownerId === currentUserIdSignal()) {
+                                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                                    <button
+                                        (click)="openAccessModal(board); $event.stopPropagation()"
+                                        class="flex items-center p-1.5 bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] rounded-full"
+                                        title="Manage Access"
+                                    >
+                                        <app-material-symbol size="18px">people</app-material-symbol>
+                                    </button>
+                                    <button
+                                        (click)="startEditing(board); $event.stopPropagation()"
+                                        class="flex items-center p-1.5 bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] rounded-full"
+                                        title="Rename"
+                                    >
+                                        <app-material-symbol size="18px">edit</app-material-symbol>
+                                    </button>
+                                    <button
+                                        (click)="deleteBoard(board.id); $event.stopPropagation()"
+                                        class="flex items-center p-1.5 bg-[#5c1515] hover:bg-[#7d1f1f] text-white rounded-full"
+                                        title="Delete"
+                                    >
+                                        <app-material-symbol size="18px">delete</app-material-symbol>
+                                    </button>
+                                </div>
+                            } @else { }
+                        }
+                    </div>
+                } @empty {
+                    <p class="text-[#93b0c8] col-span-full">Você ainda não tem nenhum board.</p>
+                }
+            </div>
         }
-      </div>
-    }
-  </div>
+
+    </div>
 </div>
+
+@if (showAccessModal()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-[#1f2933] rounded-lg shadow-xl w-[90%] max-w-md p-6 text-white">
+            <h2 class="text-xl font-bold mb-4">Gerenciar Acesso: {{ currentBoard()?.title }}</h2>
+
+            <div class="mb-4">
+                <p><strong>Owner:</strong> {{ currentUserEmail() }}</p>
+            </div>
+
+            <div class="mb-4">
+                <p class="font-semibold mb-1">Colaboradores:</p>
+                <ul>
+                    @for (email of currentBoard()?.collaboratorsEmails; track email) {
+                        <li class="flex items-center justify-between">
+                            <span>{{ email }}</span>
+                            <button
+                                (click)="onRemoveCollaborator(email)"
+                                class="ml-2 text-red-500 hover:text-red-300"
+                                title="Remover"
+                            >
+                                ×
+                            </button>
+                        </li>
+                    } @empty {
+                        <li>Nenhum colaborador (além do owner).</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="mb-4">
+                <input
+                    type="email"
+                    placeholder="E-mail do usuário…"
+                    [value]="newCollaboratorEmail()"
+                    (input)="newCollaboratorEmail.set($any($event.target).value)"
+                    class="w-full bg-[#374151] border border-[#4b5563] rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#007bff] text-white"
+                />
+                <button
+                    (click)="onAddCollaborator()"
+                    class="mt-2 bg-[#007bff] hover:bg-[#005bb5] text-white px-3 py-2 rounded"
+                >
+                    Convidar
+                </button>
+                @if (accessError()) {
+                    <p class="text-red-500 mt-1">{{ accessError() }}</p>
+                }
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button
+                    (click)="closeAccessModal()"
+                    class="bg-[#374151] hover:bg-[#4b5563] text-white px-3 py-2 rounded"
+                >
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+} @else { }

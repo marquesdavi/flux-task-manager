@@ -1,16 +1,34 @@
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+// src/app/features/board/kanban-page/kanban-page.component.ts
+import {
+    Component,
+    ElementRef,
+    OnInit,
+    QueryList,
+    ViewChildren
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-
-import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import {
+    DragDropModule,
+    CdkDragDrop,
+    moveItemInArray,
+    transferArrayItem
+} from '@angular/cdk/drag-drop';
 
 import { ColumnHeaderComponent } from '../../../shared/components/column-header/column-header.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { AddCardButtonComponent } from '../../../shared/components/add-card-button/add-card-button.component';
 
 import { CardService } from '../../../core/service/card.service';
-import { CardCreateRequest, CardResponse, CardUpdateRequest } from '../../../core/models/card';
-import {DialogService} from '../../../core/service/dialog.service';
+import {
+    CardCreateRequest,
+    CardResponse,
+    CardUpdateRequest,
+    CardAssignRequest
+} from '../../../core/models/card';
+import { DialogService } from '../../../core/service/dialog.service';
+import {UserSummary} from '../../../core/models/user';
+import {UserService} from '../../../core/service/user.service';
 
 interface Task {
     id: string;
@@ -44,9 +62,9 @@ interface Column {
 })
 export class KanbanPageComponent implements OnInit {
     columns: Column[] = [
-        { title: 'TODO',  tasks: [] },
+        { title: 'TODO', tasks: [] },
         { title: 'DOING', tasks: [] },
-        { title: 'DONE',  tasks: [] }
+        { title: 'DONE', tasks: [] }
     ];
 
     showNewCardInput: boolean[] = [false, false, false];
@@ -58,12 +76,18 @@ export class KanbanPageComponent implements OnInit {
     modalData: CardResponse | null = null;
     modalError: string = '';
 
+    assigneeEmailForAssign: string = '';
+    assignError: string = '';
+
+    collaborators: UserSummary[] = [];
+
     @ViewChildren('newCardInput') newCardInputs!: QueryList<ElementRef<HTMLInputElement>>;
     private boardId!: string;
 
     constructor(
         private cardService: CardService,
         private route: ActivatedRoute,
+        private userService: UserService,
         private dialogService: DialogService
     ) {}
 
@@ -102,38 +126,32 @@ export class KanbanPageComponent implements OnInit {
 
     formatStatusDisplay(status: 'TODO' | 'DOING' | 'DONE'): string {
         switch (status) {
-            case 'TODO':   return 'A fazer';
-            case 'DOING':  return 'Em andamento';
-            case 'DONE':   return 'Pronto';
+            case 'TODO':
+                return 'A fazer';
+            case 'DOING':
+                return 'Em andamento';
+            case 'DONE':
+                return 'Pronto';
         }
     }
 
-
     drop(event: CdkDragDrop<Task[]>): void {
         const dragged = event.item.data as Task;
-
         if (event.previousContainer === event.container) {
-            moveItemInArray(
-                event.container.data,
-                event.previousIndex,
-                event.currentIndex
-            );
+            moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
             return;
         }
-
         transferArrayItem(
             event.previousContainer.data,
             event.container.data,
             event.previousIndex,
             event.currentIndex
         );
-
         const destinationArray = event.container.data as Task[];
         const destinationColumn = this.columns.find(c => c.tasks === destinationArray);
         if (!destinationColumn) {
             return;
         }
-
         dragged.status = destinationColumn.title;
         const updatePayload: CardUpdateRequest = {
             title: dragged.title,
@@ -145,18 +163,13 @@ export class KanbanPageComponent implements OnInit {
             dueDate: dragged.dueDate,
             imageUrl: dragged.imageUrl ?? undefined
         };
-
-
         this.cardService.update(dragged.id, updatePayload).subscribe({
             next: (updated: CardResponse) => {
-                const previousColumn = this.columns.find(c =>
-                    c.tasks.some(t => t.id === updated.id)
-                );
+                const previousColumn = this.columns.find(c => c.tasks.some(t => t.id === updated.id));
                 if (previousColumn) {
                     const idxOld = previousColumn.tasks.findIndex(t => t.id === updated.id);
                     previousColumn.tasks.splice(idxOld, 1);
                 }
-
                 const newStatusColumn = this.columns.find(c => c.title === updated.status);
                 if (newStatusColumn) {
                     const newTask: Task = {
@@ -205,7 +218,6 @@ export class KanbanPageComponent implements OnInit {
             dueDate: undefined,
             imageUrl: undefined
         };
-
         this.cardService.create(this.boardId, payload).subscribe({
             next: (created: CardResponse) => {
                 const newTask: Task = {
@@ -255,6 +267,18 @@ export class KanbanPageComponent implements OnInit {
         this.cardService.getById(taskId).subscribe({
             next: (resp: CardResponse) => {
                 this.modalData = resp;
+                this.assigneeEmailForAssign = resp.assigneeEmail || '';
+                this.assignError = '';
+
+                this.userService.getUsersByBoardId(this.boardId).subscribe({
+                    next: (users: UserSummary[]) => {
+                        this.collaborators = users;
+                    },
+                    error: () => {
+                        this.collaborators = [];
+                    }
+                });
+
                 this.showModal = true;
             },
             error: () => {
@@ -269,6 +293,8 @@ export class KanbanPageComponent implements OnInit {
         this.modalTaskId = null;
         this.modalData = null;
         this.modalError = '';
+        this.assigneeEmailForAssign = '';
+        this.assignError = '';
     }
 
     saveModal(): void {
@@ -291,6 +317,7 @@ export class KanbanPageComponent implements OnInit {
         };
         this.cardService.update(this.modalTaskId, payload).subscribe({
             next: (updated: CardResponse) => {
+                // Remover da coluna antiga
                 const previousColumn = this.columns.find(c =>
                     c.tasks.some(t => t.id === updated.id)
                 );
@@ -298,6 +325,7 @@ export class KanbanPageComponent implements OnInit {
                     const idxOld = previousColumn.tasks.findIndex(t => t.id === updated.id);
                     previousColumn.tasks.splice(idxOld, 1);
                 }
+                // Adicionar na coluna de status atualizado
                 const destinationColumn = this.columns.find(c => c.title === updated.status);
                 if (destinationColumn) {
                     const newTask: Task = {
@@ -321,15 +349,50 @@ export class KanbanPageComponent implements OnInit {
         });
     }
 
+    // ←–––––– MÉTODO NOVO: dispara o PATCH /cards/{cardId}/assign
+    assignUser(): void {
+        this.assignError = '';
+
+        if (!this.assigneeEmailForAssign?.trim()) {
+            this.assignError = 'E-mail não pode ficar em branco.';
+            return;
+        }
+        if (!this.modalTaskId) {
+            this.assignError = 'Nenhum card selecionado.';
+            return;
+        }
+
+        const body: CardAssignRequest = {
+            email: this.assigneeEmailForAssign.trim()
+        };
+
+        this.cardService.assign(this.modalTaskId, body).subscribe({
+            next: (updated: CardResponse) => {
+                if (this.modalData) {
+                    this.modalData = {
+                        ...this.modalData,
+                        assigneeEmail: updated.assigneeEmail
+                    };
+                }
+                this.assigneeEmailForAssign = updated.assigneeEmail || '';
+                this.assignError = '';
+            },
+            error: err => {
+                this.assignError = err.error?.message || 'Falha ao atribuir responsável.';
+            }
+        });
+    }
+
     onAction(label: string): void {
         console.log('[onAction] argument:', label);
     }
 
     async deleteCard(cardId: string) {
-        if (!await this.dialogService.confirm('Você tem certeza que deseja excluir este card?')) {
+        if (
+            !await this.dialogService.confirm('Você tem certeza que deseja excluir este card?')
+        ) {
             return;
         }
-
         this.cardService.delete(cardId).subscribe({
             next: () => {
                 this.columns.forEach(col => {

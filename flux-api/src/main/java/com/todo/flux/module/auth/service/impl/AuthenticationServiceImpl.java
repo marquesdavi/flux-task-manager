@@ -5,6 +5,7 @@ import com.todo.flux.module.auth.dto.LoginRequest;
 import com.todo.flux.module.auth.dto.TokenResponse;
 import com.todo.flux.module.auth.service.AuthenticationService;
 import com.todo.flux.module.user.dto.RegisterRequest;
+import com.todo.flux.module.user.dto.UserSummary;
 import com.todo.flux.module.user.entity.User;
 import com.todo.flux.module.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class AuthenticationServiceImpl
         implements AuthenticationService<User, LoginRequest, TokenResponse> {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtEncoder jwtEncoder;
-    private final UserService<User, RegisterRequest> userService;
+    private final UserService<User, RegisterRequest, UserSummary> userService;
 
     @Value("${jwt.token.expires-in:3600}")
     private long expiresIn;

@@ -1,13 +1,13 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER:     postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: flux_db
+      POSTGRES_DB:       flux_db
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,23 +19,41 @@ services:
   backend:
     build:
       context: ./flux-api
-      dockerfile: DockerfileDeploy
-    image: flux-all-in-one
+      dockerfile: Dockerfile
+    image: flux-backend
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
+      # Ativa o perfil “prod”
       SPRING_PROFILES_ACTIVE: prod
+
+      # Resolve placeholders do CorsConfig:
+      #DEFAULT_ACCESS_ORIGIN: "*"
+
       SPRING_DATASOURCE_URL:      jdbc:postgresql://postgres:5432/flux_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
       retries: 5
       timeout: 5s
+
+  frontend:
+    build:
+      context: ./flux-frontend
+      dockerfile: Dockerfile
+    image: flux-frontend
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
+
 
 volumes:
   postgres_data:
