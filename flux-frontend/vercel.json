@@ -1,14 +1,24 @@
+// vercel.json
 {
     "version": 2,
     "builds": [
         {
             "src": "package.json",
             "use": "@vercel/static-build",
-            "config": { "distDir": "dist/flux-frontend/browser" }
+            "config": {
+                "distDir": "dist/flux-frontend/browser"
+            }
         }
     ],
     "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "http://35.247.226.62:8080/api/$1"
+        },
         { "handle": "filesystem" },
-        { "src": "/.*", "dest": "/index.html" }
+        {
+            "src": "/.*",
+            "dest": "/index.html"
+        }
     ]
 }
