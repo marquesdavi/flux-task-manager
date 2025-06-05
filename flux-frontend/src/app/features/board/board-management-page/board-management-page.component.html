@@ -81,7 +81,7 @@
                             </div>
 
                             @if (board.ownerId === currentUserIdSignal()) {
-                                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                                <div class="absolute top-2 right-2 flex space-x-2">
                                     <button
                                         (click)="openAccessModal(board); $event.stopPropagation()"
                                         class="flex items-center p-1.5 bg-[#374151] hover:bg-[#4b5563] text-[#93b0c8] rounded-full"

@@ -146,7 +146,7 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
 ### 5. Tela Kanban (Cards)
 
 ![Kanban](docs/2025-06-04_03-51-kanban-list.png)
-*Descrição: Quadro Kanban dividido em colunas “A fazer”, “Em andamento” e “Pronto”. Botão “Add” em cada coluna para criar novos cards.*
+*Descrição: Quadro Kanban dividido em colunas “A fazer”, “Em andamento” e “Pronto”. Botão “Add” em cada coluna para criar novos cards e filtros por **título**, **responsável**, **status** e **prioridade**.*
 
 ---
 

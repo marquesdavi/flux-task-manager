@@ -1,12 +1,12 @@
 // src/app/pages/board-management-page/board-management-page.component.ts
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-import { BoardService } from '../../../core/service/board.service';
-import { Board } from '../../../core/models/board';
-import { FormsModule } from '@angular/forms';
-import { MaterialSymbolComponent } from '../../../shared/components/material-symbol/material-symbol.component';
-import { DialogService } from '../../../core/service/dialog.service';
-import { UserService } from '../../../core/service/user.service';
+import {Component, inject, signal} from '@angular/core';
+import {Router, RouterModule} from '@angular/router';
+import {BoardService} from '../../../core/service/board.service';
+import {Board} from '../../../core/models/board';
+import {FormsModule} from '@angular/forms';
+import {MaterialSymbolComponent} from '../../../shared/components/material-symbol/material-symbol.component';
+import {DialogService} from '../../../core/service/dialog.service';
+import {UserService} from '../../../core/service/user.service';
 
 @Component({
     selector: 'app-boards-page',
@@ -20,28 +20,28 @@ import { UserService } from '../../../core/service/user.service';
     styleUrls: ['./board-management-page.component.css']
 })
 export class BoardManagementPageComponent {
-    private boardService    = inject(BoardService);
-    private router          = inject(Router);
-    private dialogService   = inject(DialogService);
-    private userService     = inject(UserService);
+    private boardService = inject(BoardService);
+    private router = inject(Router);
+    private dialogService = inject(DialogService);
+    private userService = inject(UserService);
 
-    boardsSignal         = signal<Board[]>([]);
-    loadingSignal        = signal(true);
+    boardsSignal = signal<Board[]>([]);
+    loadingSignal = signal(true);
 
-    showNewInputSignal   = signal(false);
-    newBoardTitleSignal  = signal('');
-    newBoardErrorSignal  = signal('');
+    showNewInputSignal = signal(false);
+    newBoardTitleSignal = signal('');
+    newBoardErrorSignal = signal('');
 
-    editingIdSignal      = signal<string | null>(null);
-    editTitleSignal      = signal('');
-    editErrorSignal      = signal('');
+    editingIdSignal = signal<string | null>(null);
+    editTitleSignal = signal('');
+    editErrorSignal = signal('');
 
-    showAccessModal      = signal(false);
-    currentBoard         = signal<Board | null>(null);
+    showAccessModal = signal(false);
+    currentBoard = signal<Board | null>(null);
     newCollaboratorEmail = signal('');
-    accessError          = signal('');
+    accessError = signal('');
 
-    currentUserIdSignal  = signal<number | null>(null);
+    currentUserIdSignal = signal<number | null>(null);
 
     currentUserEmail = signal<string | null>(null);
 
