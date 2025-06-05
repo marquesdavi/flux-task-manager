@@ -1,4 +1,3 @@
-// src/app/pages/board-management-page/board-management-page.component.ts
 import {Component, inject, signal} from '@angular/core';
 import {Router, RouterModule} from '@angular/router';
 import {BoardService} from '../../../core/service/board.service';

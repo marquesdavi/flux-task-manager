@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -31,11 +31,11 @@ services:
       SPRING_DATASOURCE_URL:      jdbc:postgresql://postgres:5432/flux_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      JWT_PUBLIC_KEY_PATH:        file:/app/keys/app.pub
-      JWT_PRIVATE_KEY_PATH:       file:/app/keys/app.key
-      DEFAULT_ACCESS_ORIGIN:      http://localhost:8080
+      JWT_PUBLIC_KEY_PATH: file:/app/keys/app.pub
+      JWT_PRIVATE_KEY_PATH: file:/app/keys/app.key
+      DEFAULT_ACCESS_ORIGIN: http://localhost:8080
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 10s
       retries: 5
       timeout: 5s

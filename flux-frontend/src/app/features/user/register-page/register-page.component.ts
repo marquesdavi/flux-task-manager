@@ -1,4 +1,3 @@
-// src/app/features/register-page/register-page.component.ts
 import {Component, OnDestroy, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
@@ -34,7 +33,6 @@ export class RegisterPageComponent implements OnDestroy {
     private registerSub?: Subscription;
 
     constructor() {
-        // Se já estiver logado, redireciona para /board (rota principal)
         if (this.authService.isLoggedIn()) {
             this.router.navigate(['/board']);
         }

@@ -3,8 +3,9 @@ package com.todo.flux.exception.handler;
 import com.todo.flux.exception.AlreadyExistsException;
 import com.todo.flux.exception.GenericException;
 import com.todo.flux.exception.NotFoundException;
-import com.todo.flux.exception.dto.ValidationError;
 import com.todo.flux.exception.dto.ErrorResponse;
+import com.todo.flux.exception.dto.ValidationError;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -80,12 +81,12 @@ public class GenericExceptionHandler {
         return buildErrorResponse("Validation failed", HttpStatus.BAD_REQUEST, errors);
     }
 
-//    @ExceptionHandler(RequestNotPermitted.class)
-//    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-//    public ResponseEntity<ErrorResponse> handleRateLimiterException(RequestNotPermitted ex) {
-//        log.error("RateLimiter exception: {}", ex.getMessage());
-//        return buildErrorResponse("Too many requests - please try again later.", HttpStatus.TOO_MANY_REQUESTS);
-//    }
+    @ExceptionHandler(RequestNotPermitted.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ResponseEntity<ErrorResponse> handleRateLimiterException(RequestNotPermitted ex) {
+        log.error("RateLimiter exception: {}", ex.getMessage());
+        return buildErrorResponse("Too many requests - please try again later.", HttpStatus.TOO_MANY_REQUESTS);
+    }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(String message, HttpStatus status) {
         return ResponseEntity.status(status).body(new ErrorResponse(message, status));
