@@ -28,7 +28,7 @@ services:
       - "8080:8080"
     environment:
       # Ativa o perfil “prod”
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: local
 
       # Resolve placeholders do CorsConfig:
       #DEFAULT_ACCESS_ORIGIN: "*"
@@ -52,7 +52,7 @@ services:
       backend:
         condition: service_started
     ports:
-      - "80:80"
+      - "8081:80"
 
 
 volumes:

@@ -1,4 +1,4 @@
 export const environment = {
     production: false,
-    api: 'https://kontaktapplication.ddns.net/api'
+    api: 'http://localhost:8080/api'
 };

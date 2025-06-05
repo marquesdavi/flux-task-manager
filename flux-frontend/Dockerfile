@@ -5,8 +5,8 @@ COPY package*.json ./
 RUN npm ci --silent
 
 COPY . .
-ARG NODE_ENV=production
-RUN npm run build -- --configuration=production
+ARG NODE_ENV=development
+RUN npm run build -- --configuration=development
 
 FROM nginx:1.25-alpine
 

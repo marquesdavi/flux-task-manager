@@ -1,11 +1,8 @@
-// src/app/core/service/board.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { Board } from '../models/board';
-
-interface CollaboratorRequest { email: string; }
 
 @Injectable({ providedIn: 'root' })
 export class BoardService {

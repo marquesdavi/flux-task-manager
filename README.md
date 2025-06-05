@@ -10,7 +10,8 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
   * **Resiliência**: Rate Limiter e Circuit Breaker para prevenir ataques de Brute Force e DDoS bem como a exaustão dos recursos.
 * **Banco de Dados (PostgreSQL)**: Armazenamento de usuários, boards, cards.
 * **Docker Compose**: Orquestração dos contêineres de frontend, backend e banco de dados, facilitando o deploy local.
-
+* **Google Cloud Platform(GCP)**: Utilizada para fazer o deploy da API e do Banco de Dados.
+* **Vercel**: Utilizada para fazer o deploy do frontend.
 
 ---
 ## Tecnologias Utilizadas
@@ -29,18 +30,18 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
   * Spring Security (OAuth2 Resource Server, JWT Bearer Tokens)
   * Spring Data JPA + Hibernate (persistência em PostgreSQL)
   * Lombok (redução de boilerplate)
-  * Resilience4j (circuit breaker e rate limiter em pontos críticos)
+  * Resilience4j (circuit breaker e rate limiter)
   * Spring Actuator
   * Bean Validation
 * **Banco de Dados**
 
   * [PostgreSQL](https://www.postgresql.org/)
 * **Infraestrutura & DevOps**
-
+  * Google Cloud Platform(GCP) - Backend
+  * Vercel - Frontend
   * Docker + Docker Compose
-  * nginx (servendo build do Angular)
-  * Maven (build do backend)
-  * Node.js 20 / npm (build do frontend)
+  * nginx (serve build do Angular no local)
+
 * **Documentação da API**
 
   * OpenAPI 3 (via dependência `springdoc-openapi-ui`)
@@ -59,7 +60,7 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
 1. **Clonar o repositório**
 
    ```bash
-   git clone https://github.com/marquesdavi/flux.git
+   git clone https://github.com/marquesdavi/flux-task-manager.git
    cd flux
    ```
 
@@ -68,7 +69,7 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
    O projeto já utiliza um `application.properties` padrão para conexão com PostgreSQL via Docker. Caso queira alterar, edite em `backend/src/main/resources/application.properties`:
 
    ```properties
-   spring.datasource.url=jdbc:postgresql://postgres:5432/fluxdb
+   spring.datasource.url=jdbc:postgresql://postgres:5432/flux_db
    spring.datasource.username=postgres
    spring.datasource.password=postgres
    spring.jpa.hibernate.ddl-auto=update
@@ -84,7 +85,7 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
 
    Isso irá:
 
-   * Subir um contêiner `postgres:15` nomeado `flux-postgres-1` (banco de dados).
+   * Subir um contêiner `postgres:17` nomeado `flux-postgres-1` (banco de dados).
    * Buildar e subir o contêiner `flux-backend` na porta **8080**.
    * Buildar e subir o contêiner `flux-frontend` (nginx servindo build Angular) na porta **80** (ou **4200**, conforme configuração do `nginx.conf`).
 
@@ -96,7 +97,7 @@ Flux é uma aplicação web de gerenciamento de tarefas em estilo Kanban, que pe
      * Swagger UI (OpenAPI) em `http://localhost:8080/swagger-ui.html`
    * **Frontend**:
 
-     * Abrir `http://localhost/` ou `http://localhost:80/board` (dependendo de roteamento) para acessar a aplicação Angular.
+     * Abrir `http://localhost:8081/board` para acessar no local ou `https://flux-task-manager.vercel.app/board` para acessar produção.
 
 5. **Criar usuário e autenticar**
 
