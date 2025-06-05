@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 @Aspect
@@ -41,7 +42,7 @@ public class ResilientAspect {
             log.error("Resilience error in method {}: {}", joinPoint.getSignature().getName(), e.getMessage());
             if (!resilient.fallbackMethod().isEmpty()) {
                 Object fallbackResult = invokeFallback(joinPoint, resilient.fallbackMethod(), e);
-                if (fallbackResult != null) {
+                if (Objects.nonNull(fallbackResult)) {
                     return fallbackResult;
                 } else {
                     throw new RuntimeException("Fallback method returned null.", e);
@@ -54,20 +55,20 @@ public class ResilientAspect {
     private boolean containsRequestNotPermitted(Throwable t) {
         if (t instanceof RequestNotPermitted) {
             return true;
-        } else if (t.getCause() != null) {
+        } else if (Objects.nonNull(t.getCause())) {
             return containsRequestNotPermitted(t.getCause());
         }
         return false;
     }
 
     private RateLimiter resolveRateLimiter(String rateLimiterName) {
-        return (rateLimiterName != null && !rateLimiterName.isEmpty())
+        return (Objects.nonNull(rateLimiterName) && !rateLimiterName.isEmpty())
                 ? rateLimiterRegistry.rateLimiter(rateLimiterName)
                 : null;
     }
 
     private CircuitBreaker resolveCircuitBreaker(String circuitBreakerName) {
-        return (circuitBreakerName != null && !circuitBreakerName.isEmpty())
+        return (Objects.nonNull(circuitBreakerName) && !circuitBreakerName.isEmpty())
                 ? circuitBreakerRegistry.circuitBreaker(circuitBreakerName)
                 : null;
     }
@@ -83,10 +84,10 @@ public class ResilientAspect {
             }
         };
 
-        if (circuitBreaker != null) {
+        if (Objects.nonNull(circuitBreaker)) {
             supplier = CircuitBreaker.decorateSupplier(circuitBreaker, supplier);
         }
-        if (rateLimiter != null) {
+        if (Objects.nonNull(rateLimiter)) {
             supplier = RateLimiter.decorateSupplier(rateLimiter, supplier);
         }
         return supplier;
@@ -99,7 +100,7 @@ public class ResilientAspect {
         Object[] fallbackArgs = buildFallbackArguments(originalArgs, exception);
 
         Method fallbackMethod = findFallbackMethod(target, fallbackMethodName, fallbackArgs.length);
-        if (fallbackMethod != null) {
+        if (Objects.nonNull(fallbackMethod)) {
             return fallbackMethod.invoke(target, fallbackArgs);
         } else {
             throw new IllegalStateException("Fallback method not found: " + fallbackMethodName);

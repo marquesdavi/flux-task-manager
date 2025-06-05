@@ -15,6 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Data
@@ -87,7 +88,9 @@ public class Card {
         this.setDescriptionBrief(dto.descriptionBrief());
         this.setDescriptionFull(dto.descriptionFull());
         this.setStatus(CardStatus.valueOf(dto.status()));
-        this.setPriority(CardPriority.valueOf(dto.priority()));
+        if (Objects.nonNull(dto.priority())) {
+            this.setPriority(CardPriority.valueOf(dto.priority()));
+        }
         this.setStartDate(dto.startDate());
         this.setEndDate(dto.endDate());
         this.setDueDate(dto.dueDate());
@@ -110,8 +113,8 @@ public class Card {
                 this.getDueDate(),
                 this.getImageUrl(),
                 this.getBoard().getId(),
-                this.getPriority() != null ? this.getPriority().name() : null,
-                this.getAssignee() != null ? this.getAssignee().getEmail() : null,
+                Objects.nonNull(this.getPriority()) ? this.getPriority().name() : null,
+                Objects.nonNull(this.getAssignee()) ? this.getAssignee().getEmail() : null,
                 this.getCreatedAt(),
                 this.getUpdatedAt()
         );

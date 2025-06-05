@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 
 @Data
@@ -36,7 +37,7 @@ public class User implements Serializable {
     private RoleEnum role;
 
     public static User fromRequest(RegisterRequest registerRequest) {
-        if (registerRequest == null) {
+        if (Objects.isNull(registerRequest)) {
             return null;
         }
 
