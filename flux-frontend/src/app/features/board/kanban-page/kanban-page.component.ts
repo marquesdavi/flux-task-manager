@@ -309,6 +309,9 @@ export class KanbanPageComponent implements OnInit {
         this.modalTaskId = taskId;
         this.cardService.getById(taskId).subscribe({
             next: (resp: CardResponse) => {
+                if (!resp.priority) {
+                    resp.priority = 'LOW';
+                }
                 this.modalData = resp;
                 this.assigneeEmailForAssign = resp.assigneeEmail || '';
                 this.assignError = '';

@@ -88,7 +88,9 @@ public class Card {
         this.setDescriptionBrief(dto.descriptionBrief());
         this.setDescriptionFull(dto.descriptionFull());
         this.setStatus(CardStatus.valueOf(dto.status()));
-        if (Objects.nonNull(dto.priority())) {
+        if (dto.priority() == null) {
+            this.setPriority(CardPriority.LOW);
+        } else {
             this.setPriority(CardPriority.valueOf(dto.priority()));
         }
         this.setStartDate(dto.startDate());

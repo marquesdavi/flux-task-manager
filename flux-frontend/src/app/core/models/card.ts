@@ -33,9 +33,9 @@ export interface CardResponse {
     imageUrl: string | null;
     priority: 'LOW' | 'MEDIUM' | 'HIGH' | null;
     assigneeEmail: string | null;
-    boardId: string;                // UUID
-    createdAt: string;                // date-time ISO
-    updatedAt: string;                // date-time ISO
+    boardId: string; // UUID
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CardAssignRequest {
